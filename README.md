@@ -21,3 +21,8 @@ testing branches) but not all scripts are tested on Debian.
 Generally scripts that begin with _ are support scripts that will be
 called by other scripts. You can ignore them unless you feel like
 plumbing.
+
+
+Test Status
+============
+[![Build Status](https://travis-ci.org/mlogic/yan-common.svg?branch=master)](https://travis-ci.org/mlogic/yan-common)
