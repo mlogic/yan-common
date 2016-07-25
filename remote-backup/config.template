@@ -1,0 +1,22 @@
+# Local staging area. Archives are created here first before scp'ing to remote.
+# Need to have enough space for the initial full snapshot.
+STAGING=/zbak/remote-backup-staging
+# ZPAQ binary location
+ZPAQ=/home/yanli/zpaq/zpaq
+# ZPAQ options. It should begin with files and directories you want to backup
+# and followed by options.
+ZPAQOPT=(/home /etc -key ENCRYPTION_KEY_HERE -m4)
+# Remote host and login information.
+REMOTE=yanli@remote_backup_host
+REMOTE_DIR=backup
+# SSH ID for accessing remote host
+SSH_ID=/home/yanli/.ssh/id_rsa
+
+# How many partial snapshots to keep at remote before creating a new full snapshot.
+REMOTE_PARTIAL_SNAPSHOTS_TO_KEEP=30
+
+# How many recent remote FULL snapshots to keep. Older ones will be deleted.
+# Unset this variable to disable removing remote snapshots.
+REMOTE_FULL_SNAPSHOTS_TO_KEEP=3
+
+LOCK=/tmp/remote-backup.pid
