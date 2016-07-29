@@ -41,8 +41,10 @@ EOF
 fi
 
 export CONFIG=$1
+HOMEDIR=`dirname $0`
 
-./_update-archive.sh
-./_upload-archive.sh
-./_clean-up-remote.sh
-./_clean-up-staging.sh
+${HOMEDIR}/_update-archive.sh
+${HOMEDIR}/_upload-archive.sh
+${HOMEDIR}/_clean-up-remote.sh
+${HOMEDIR}/_clean-up-staging.sh
+
