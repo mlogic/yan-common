@@ -31,6 +31,9 @@
 #
 # Usage:
 # ansible-playbook -i 127.0.0.1, --connection=local start-virtualbox-vm.yaml -e vm_name=YOUR_VM
+# or in another playbook:
+# tasks:
+#  - include: start-virtualbox-vm.yml vm_name=centos7
 
 - hosts: all
   tasks:
@@ -38,8 +41,8 @@
     shell: if ! VBoxManage showvminfo {{ vm_name }} | egrep -q "State.*running"; then VBoxManage startvm {{ vm_name }} --type headless; fi
 
   - name: waiting for host to come online
-    local_action: wait_for host={{ vm_name }}
-                  state=started
-                  port=22
-                  delay=1
-                  timeout=120
+    wait_for: host={{ vm_name }}
+              state=started
+              port=22
+              delay=1
+              timeout=120
