@@ -37,6 +37,8 @@ via ssh
 
 Usage: $0 host
 
+Sample: $0 root@my-web-server.com
+
 EOF
     exit 2
 fi
@@ -44,6 +46,9 @@ fi
 
 HOST=$1
 ssh $1 "$( cat<<EOT
-docker rmi \$(docker images -f "dangling=true" -q)
+docker images -f "dangling=true" -q >/tmp/di
+if [ \$(cat /tmp/di | wc -l) -gt 0 ]; then
+    cat /tmp/di | xargs docker rmi
+fi
 EOT
 )"
