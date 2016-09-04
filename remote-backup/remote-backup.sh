@@ -31,7 +31,7 @@ set -e -u
 if [ $# -ne 1 ]; then
     cat<<EOF
 Incremental, differential, de-duplicated backup tool using zpaq
-(http://mattmahoney.net/dc/zpaq.html). This tool create snapshots and uploads
+(http://mattmahoney.net/dc/zpaq.html). This tool creates snapshots and uploads
 them to a remote host.
 
 Usage: $0 config
