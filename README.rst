@@ -34,7 +34,9 @@ Supported OS
 `CentOS <https://www.centos.org/>`_ (usually the latest and latest-1
 releases) is my work horse OS so most scripts here are tested on it. I
 also use `Debian <http://www.debian.org/>`_ (usually the stable and
-testing branches) but not all scripts are tested on Debian.
+testing branches) but not all scripts are tested on Debian. I welcome
+patches for making them work on other OS and all other kinds of
+improvements.
 
 Naming Convention
 =================
