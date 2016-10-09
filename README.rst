@@ -7,6 +7,8 @@ requests.
 
 * del: Use this instead of rm because rm is too risky. del uses /tmp
   as a recycle bin so you can recover your files until you reboot.
+* distill-pdf.sh: Distill a PDF and generat a (somehow) PDF/A
+  compliant PDF file using GhostScript.
 * os/clean-up-dangling-docker-images.sh
 * os/os/clean-up-remote-dangling-docker-images.sh: Clean up dangling
   (unused) docker images to save disk space on a remote host via ssh.
