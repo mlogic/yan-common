@@ -26,6 +26,7 @@
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 set -e -u
+if [ -n "${DEBUG:-}" ]; then set -x; fi
 . "$CONFIG"
 
 if [ -e $LOCK ]; then
@@ -52,5 +53,11 @@ else
     SNAPSHOT_NAME=`basename "${STAGING}"/*.index.zpaq | sed -e "s/.index.zpaq//g"`
 fi
 
-
-$ZPAQ a "${STAGING}/${SNAPSHOT_NAME}-????" ${ZPAQOPT[@]} -index "${STAGING}/${SNAPSHOT_NAME}.index.zpaq"
+set +e
+nice $ZPAQ a "${STAGING}/${SNAPSHOT_NAME}-????" ${ZPAQOPT[@]} -index "${STAGING}/${SNAPSHOT_NAME}.index.zpaq"
+RC=$?
+set -e
+# zpaq returns 0 on no error, 1 on warnings, and 2 on errors. We only stop on errors.
+if [ $RC -ge 2 ]; then
+    exit $RC
+fi

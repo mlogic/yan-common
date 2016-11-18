@@ -26,6 +26,7 @@
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 set -e -u
+if [ -n "${DEBUG:-}" ]; then set -x; fi
 . "$CONFIG"
 . `dirname $0`/_support_funcs.sh
 

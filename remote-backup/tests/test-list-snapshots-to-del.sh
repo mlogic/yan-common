@@ -38,3 +38,5 @@ mock-staging/snapshot-2016-04-23-*"
 [ "$EXP_SNAPSHOTS_TO_DEL" = "$SNAPSHOTS_TO_DEL" ]
 
 [ `get_latest_snapshot_number mock-staging` -eq 4 ]
+
+echo "PASS: $0"

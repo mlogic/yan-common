@@ -38,9 +38,15 @@ EOF
 fi
 
 export CONFIG=$1
+. "$CONFIG"
 HOMEDIR=`dirname $0`
 
 ${HOMEDIR}/_update-archive.sh
+
+if [ -n "${PRE_UPLOAD_HOOK:-}" ]; then
+    eval $PRE_UPLOAD_HOOK
+fi
+
 ${HOMEDIR}/_upload-archive.sh
 ${HOMEDIR}/_clean-up-remote.sh
 ${HOMEDIR}/_clean-up-staging.sh

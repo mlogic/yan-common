@@ -1,5 +1,5 @@
 #!/bin/bash
-# Upload archives in the staging area using scp
+# Mock zpaq for testing
 #
 # Copyright (c) 2016, Yan Li <yanli@ascar.io>,
 # All rights reserved.
@@ -26,18 +26,4 @@
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 set -e -u
-if [ -n "${DEBUG:-}" ]; then set -x; fi
-. "$CONFIG"
-
-if [ -e $LOCK ]; then
-    echo "Lock file exist, exiting: $LOCK"
-    exit 3
-fi
-cleanup() {
-    rm -f $LOCK
-}
-trap cleanup EXIT
-echo $$ >$LOCK
-
-# We don't need to copy the index file.
-scp -i "$SSH_ID" "${STAGING}"/snapshot-*-*-*-*.zpaq "${REMOTE}:${REMOTE_DIR}"
+touch "$2"

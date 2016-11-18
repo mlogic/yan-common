@@ -1,6 +1,6 @@
 #!/bin/bash
-# Upload archives in the staging area using scp
-#
+# Test case for hooks
+# 
 # Copyright (c) 2016, Yan Li <yanli@ascar.io>,
 # All rights reserved.
 #
@@ -25,19 +25,14 @@
 # CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-set -e -u
-if [ -n "${DEBUG:-}" ]; then set -x; fi
-. "$CONFIG"
+set -u
 
-if [ -e $LOCK ]; then
-    echo "Lock file exist, exiting: $LOCK"
-    exit 3
+cd `dirname $0`
+../remote-backup.sh test-pre-upload-hook.config
+RC=$?
+if [ $RC -ne 42 ]; then
+    echo "FAIL: expected return value 42, got $RC"
+    exit 1
+else
+    echo "PASS: $0"
 fi
-cleanup() {
-    rm -f $LOCK
-}
-trap cleanup EXIT
-echo $$ >$LOCK
-
-# We don't need to copy the index file.
-scp -i "$SSH_ID" "${STAGING}"/snapshot-*-*-*-*.zpaq "${REMOTE}:${REMOTE_DIR}"
