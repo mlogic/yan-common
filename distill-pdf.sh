@@ -30,20 +30,40 @@
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 set -e -u
 
-if [ $# -ne 2 ]; then
+if [ $# -eq 0 ]; then
     cat<<EOF
-Usage: $0 src dst
+Usage: $0 -n src [dst]
+-n    Do not use pdfdef.ps. This can be used to distill small figures
+      that will be inserted into LaTeX documents to generate a
+      compliant document.
+If dst is missing, a file named src_distilled.pdf will be generated.
 EOF
     exit 2
 fi
+USE_PDFDEF=1
+if [ "$1" = "-n" ]; then
+    USE_PDFDEF=0
+    shift
+fi
+
 TMP=`mktemp`
+
+echo "Distilling $1..."
 
 # ghostscript cannot handle PDF->PDF correctly. The foolproof way is
 # to do pdf2ps first. The problem is this damages some information
 # such as bookmarks.
 pdf2ps "$1" "$TMP"
 
-if [ ! -f pdfdef.ps ]; then
+if [ $# -ge 2 ]; then
+    DST=$2
+else
+    DST=${1%.*}_distilled.pdf
+fi
+
+if [ $USE_PDFDEF -eq 0 ]; then
+    INPUT_FILES=("$TMP")
+elif [ ! -f pdfdef.ps ]; then
     cat<<EOF
 WARNING: pdfdef.ps missing. Follow
 http://svn.ghostscript.com/ghostscript/trunk/gs/doc/Ps2pdf.htm#PDFA to prepare it.
@@ -57,4 +77,4 @@ gs -sDEVICE=pdfwrite -q -dNOPAUSE -dBATCH -dNOSAFER     \
     -dPDFA -dUseCIEColor -sProcessColorModel=DeviceCMYK \
     -dEmbedAllFonts=true -dPDFACompatibilityPolicy=2    \
     -dDetectDuplicateImages -dFastWebView=true \
-    -sOutputFile="$2" ${INPUT_FILES[@]}
+    -sOutputFile="$DST" ${INPUT_FILES[@]}
