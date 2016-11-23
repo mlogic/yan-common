@@ -1,6 +1,8 @@
 #!/bin/bash
-# Distill a PDF and generate a (somehow) PDF/A compliant document. The
-# result is not fully compliant but should be safe for most readers.
+# Distill a PDF using Ghostscript. You have the option to generate a
+# PDF/A-2b (default) or PDF/X compliant document. Due to bugs of
+# Ghostscript, sometimes the result might not be fully compliant but
+# should be safe for most readers.
 #
 # Ref: http://unix.stackexchange.com/questions/79516/converting-pdf-to-pdf-a
 #
@@ -32,28 +34,61 @@ set -e -u
 
 if [ $# -eq 0 ]; then
     cat<<EOF
-Usage: $0 -n src [dst]
+Usage: $0 [options] src [dst]
+
+Using the latest Ghostscript is highly recommended because old
+versions -- especially before 2.11 -- have many bugs. Ghostscript
+website provides easy-to-use static binaries for Linux.
+
+If dst is missing, a file named src_distilled.pdf will be generated.
+
+-a    PDF/A-2b (default).
+-x    PDF/X.
+-p    Do a pdf2ps pass first. WARNING: Use this only if other methods failed to
+      generate compliant files for you. This generates the most compliant
+      document but if any page of your document has transparent objects
+      the whole page will be rasterized. Also PDF bookmarks and links
+      will be lost.
 -n    Do not use pdfdef.ps. This can be used to distill small figures
       that will be inserted into LaTeX documents to generate a
       compliant document.
-If dst is missing, a file named src_distilled.pdf will be generated.
 EOF
     exit 2
 fi
+
+PDFA=0
+PDFX=0
+PSPASS=0
 USE_PDFDEF=1
-if [ "$1" = "-n" ]; then
-    USE_PDFDEF=0
-    shift
+while getopts "axpn" var; do
+    case $var in
+        a)
+            PDFA=1
+            ;;
+        x)
+            PDFX=1
+            ;;
+        p)
+            PSPASS=1
+            ;;
+        n)
+            USE_PDFDEF=0
+            ;;
+	?)
+	    exit 1
+            ;;
+    esac
+done
+shift $(( $OPTIND - 1 ))
+
+if [ $PDFA -eq 1 -a $PDFX -eq 1 ]; then
+    echo "Cannot specify both PDF/A and PDF/X. Exiting..."
+    exit 2
+elif [ $PDFX -eq 1 ]; then
+    PDFMODE=X
+else
+    PDFMODE=A
 fi
-
-TMP=`mktemp`
-
-echo "Distilling $1..."
-
-# ghostscript cannot handle PDF->PDF correctly. The foolproof way is
-# to do pdf2ps first. The problem is this damages some information
-# such as bookmarks.
-pdf2ps "$1" "$TMP"
 
 if [ $# -ge 2 ]; then
     DST=$2
@@ -61,20 +96,36 @@ else
     DST=${1%.*}_distilled.pdf
 fi
 
+echo "Distilling $1..."
+
+if [ $PSPASS -eq 1 ]; then
+    TMP=`mktemp`
+    pdf2ps "$1" "$TMP"
+    SRC=$TMP
+else
+    SRC=$1
+fi
+
 if [ $USE_PDFDEF -eq 0 ]; then
-    INPUT_FILES=("$TMP")
+    INPUT_FILES=("$SRC")
 elif [ ! -f pdfdef.ps ]; then
     cat<<EOF
 WARNING: pdfdef.ps missing. Follow
 http://svn.ghostscript.com/ghostscript/trunk/gs/doc/Ps2pdf.htm#PDFA to prepare it.
 EOF
-    INPUT_FILES=("$TMP")
+    INPUT_FILES=("$SRC")
 else
-    INPUT_FILES=(pdfdef.ps "$TMP")
+    INPUT_FILES=(pdfdef.ps "$SRC")
 fi
 
-gs -sDEVICE=pdfwrite -q -dNOPAUSE -dBATCH -dNOSAFER     \
-    -dPDFA -dUseCIEColor -sProcessColorModel=DeviceCMYK \
-    -dEmbedAllFonts=true -dPDFACompatibilityPolicy=2    \
-    -dDetectDuplicateImages -dFastWebView=true \
-    -sOutputFile="$DST" ${INPUT_FILES[@]}
+# Ghostscript 9.11+ recommends against using -dUseCIEColor
+ARGS=(-sDEVICE=pdfwrite -q -dNOPAUSE -dBATCH -dNOSAFER -sProcessColorModel=DeviceCMYK
+      -dEmbedAllFonts=true -dDetectDuplicateImages -dFastWebView=true -dPDFACompatibilityPolicy=1)
+
+if [ $PDFMODE = A ]; then
+    ARGS+=(-dPDFA=2)
+elif [ $PDFMODE = X ]; then
+    ARGS+=(-dPDFX)
+fi
+
+gs "${ARGS[@]}" -sOutputFile="$DST" "${INPUT_FILES[@]}"
