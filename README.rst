@@ -2,7 +2,7 @@ INTRODUCTION
 ============
 
 Yan's collection of scripts for daily chores. Use at your own risk!
-There is no warranty. But I still welcome comments/issues/pull
+There is no warranty. But I do welcome comments/issues/pull
 requests.
 
 * del: Use this instead of rm because rm is too risky. del uses /tmp
@@ -24,6 +24,10 @@ requests.
   timeout.
 * vbox-remove-old-auto-snapshots.sh: A tool for keeping a certain
   number of VirtualBox snapshots and removing the older ones.
+* roles/bootstrap-centos7: default tasks that need to be done on any
+  newly installed CentOS 7 system.
+* roles/mail-relay-gmx: set up a host to send outgoing emails through
+  a GMX relay account.
 
 Check out each tool for help information.
 

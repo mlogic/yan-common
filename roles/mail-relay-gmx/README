@@ -1,0 +1,13 @@
+# This role set up a host to send all outgoing emails through a GMX
+# relay by using Postfix (tested on CentOS 7 only). You need a GMX
+# account. This is a sample playbook to use this role:
+---
+- hosts: all
+  become: yes
+  become_method: sudo
+  vars:
+    - from_addr: my_account@gmx.com
+    - map_root_to: my_receiving_account@personal.com
+    - gmx_account: my_account@gmx.com:PASSWORD_HERE
+  roles:
+  - mail-relay-gmx
