@@ -28,6 +28,7 @@ requests.
   newly installed CentOS 7 system.
 * roles/mail-relay-gmx: set up a host to send outgoing emails through
   a GMX relay account.
+* roles/reboot: reboot a host and wait for it to come back online.
 
 Check out each tool for help information.
 
