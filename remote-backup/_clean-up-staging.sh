@@ -1,7 +1,7 @@
 #!/bin/bash
 # Upload archives in the staging area using scp
 #
-# Copyright (c) 2016, Yan Li <yanli@ascar.io>,
+# Copyright (c) 2016, 2017, Yan Li <yanli@ascar.io>,
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
