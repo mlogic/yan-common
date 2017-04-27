@@ -61,6 +61,7 @@
     - mg
     - moreutils
     - yum-cron
+    - yum-utils
   when: ansible_os_family == "RedHat"
 
 - name: enable yum-cron
