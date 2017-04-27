@@ -28,7 +28,11 @@ requests.
   newly installed CentOS 7 system.
 * roles/mail-relay-gmx: set up a host to send outgoing emails through
   a GMX relay account.
-* roles/reboot: reboot a host and wait for it to come back online.
+* roles/reboot: Reboot a host and wait for it to come back online.
+* roles/local-security-scanners: Install and set up local security
+  scanners (for now it only includes ClamAV). The local security scan
+  is done weekly and any changes are mailed to you. Check
+  `roles/local-security-scanners/README` for instructions.
 
 Check out each tool for help information.
 

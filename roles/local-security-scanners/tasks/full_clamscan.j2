@@ -1,0 +1,89 @@
+#!/bin/bash
+# !!!!!!!!!!!!!!!!!!!!!
+# {{ ansible_managed }}
+# !!!!!!!!!!!!!!!!!!!!!
+# 
+# Daily Clam scan script
+#
+# Based on scripts (probably in public domain) from
+# http://www.digitalsanctuary.com/tech-blog/debian/automated-clamav-virus-scanning.html
+#
+# Copyright (c) 2016, 2017 Yan Li <yanli@ascar.io>,
+# All rights reserved.
+#
+# Redistribution and use in source and binary forms, with or without
+# modification, are permitted provided that the following conditions are met:
+#     * Redistributions of source code must retain the above copyright
+#       notice, this list of conditions and the following disclaimer.
+#     * Redistributions in binary form must reproduce the above copyright
+#       notice, this list of conditions and the following disclaimer in the
+#       documentation and/or other materials provided with the distribution.
+#     * Neither the name of Yan Li nor the names of other contributors
+#       may be used to endorse or promote products derived from this
+#       software without specific prior written permission.
+#
+#
+# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+# "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+# LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
+# FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL YAN LI BE
+# LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+# CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+# SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR
+# BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
+# LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+# NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+# SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+# email subject
+SUBJECT="VIRUS DETECTED ON `hostname`!!!"
+# Email To ?
+EMAILTO="{{ email_to }}"
+EMAILFROM="{{ email_from }}"
+# Log location
+LOG=/var/log/clamav/scan.log
+ 
+check_scan () {
+ 
+    # Check the last set of results. If there are any "Infected" counts that aren't zero, we have a problem.
+    if [ `tail -n 12 ${LOG}  | grep Infected | grep -v 0 | wc -l` != 0 ]
+    then
+        EMAILMESSAGE=`mktemp /tmp/virus-alert.XXXXX`
+        echo "To: ${EMAILTO}" >>  ${EMAILMESSAGE}
+        echo "From: ${EMAILFROM}" >>  ${EMAILMESSAGE}
+        echo "Subject: ${SUBJECT}" >>  ${EMAILMESSAGE}
+        echo "Importance: High" >> ${EMAILMESSAGE}
+        echo "X-Priority: 1" >> ${EMAILMESSAGE}
+        if [ -f "${LOG}.1" ]; then
+            echo "Changes since last scan:" >> ${EMAILMESSAGE}
+            diff -u "${LOG}.1" "${LOG}" >> ${EMAILMESSAGE}
+            echo  >> ${EMAILMESSAGE}
+        fi
+        echo "Excerpt of the scan log:" >> ${EMAILMESSAGE}
+        echo "`tail -n 50 ${LOG}`" >> ${EMAILMESSAGE}
+        sendmail -t < ${EMAILMESSAGE}
+    fi
+ 
+}
+
+# rotate log files first
+LRCONF=`mktemp /tmp/clamscan-logrotate.conf.XXXXX`
+cat >"$LRCONF" <<EOF
+$LOG {
+    notifempty
+    missingok
+    rotate 10
+    size 0
+}
+EOF
+logrotate "$LRCONF"
+ 
+# --infected: don't report OK files
+# -r: recursive
+# --detect-pua: detect possible unwanted applications
+#
+# Don't use --log, because that would trigger SELinux warning on
+# clamscan trying to write to /var/log.
+clamscan --infected -r --exclude-dir="{{ exclude_dirs }}" / &>>${LOG}
+ 
+check_scan
