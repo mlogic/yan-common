@@ -26,8 +26,18 @@
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ---
 - name: install packages
-  yum: name=clamav,logrotate
+  yum: name=clamav,clamav-update,logrotate
        state=latest
+
+- name: enable freshclam
+  lineinfile:
+    dest:   /etc/freshclam.conf
+    regexp: "{{ item.regexp }}"
+    line:   "{{ item.line }}"
+  with_items:
+    - { regexp: 'Example$', line: '# Example' }
+    - { regexp: 'DatabaseMirror db\...\.clamav\.net', line: 'DatabaseMirror db.us.clamav.net' }
+    - { regexp: 'Checks', line: 'Checks 1' }
 
 - name: clamav log directory
   file: path=/var/log/clamav
