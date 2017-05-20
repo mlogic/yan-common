@@ -39,6 +39,12 @@
     - { regexp: 'DatabaseMirror db\...\.clamav\.net', line: 'DatabaseMirror db.us.clamav.net' }
     - { regexp: 'Checks', line: 'Checks 1' }
 
+- name: enable freshclam in sysconfig
+  lineinfile:
+    dest:   /etc/sysconfig/freshclam
+    regexp: "^FRESHCLAM_DELAY=disabled-warn.*"
+    state:  absent
+
 - name: clamav log directory
   file: path=/var/log/clamav
         state=directory
