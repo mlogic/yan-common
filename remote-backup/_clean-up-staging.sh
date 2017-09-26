@@ -33,7 +33,7 @@ if [ -n "${DEBUG:-}" ]; then set -x; fi
 if [ $REMOTE_PARTIAL_SNAPSHOTS_TO_KEEP ]; then
     if [ `get_latest_snapshot_number "$STAGING"` -gt $REMOTE_PARTIAL_SNAPSHOTS_TO_KEEP ]; then
         # remove index files so next backup will be full
-        rm -f "$STAGING"/*.index.zpaq
+        rm -f "$STAGING"/snapshot*
     fi
 fi
 

@@ -46,7 +46,9 @@ if [ ! -d "$STAGING" ]; then
 fi
 
 if ! ls "${STAGING}"/*.index.zpaq 1>/dev/null 2>&1; then
-    # Create a new full snapshot when there is no index
+    # Create a new full snapshot when there is no index.
+    # Remove any residue files from previous failed runs.
+    rm -f "$STAGING"/snapshot*
     SNAPSHOT_NAME=snapshot-`date +%Y-%m-%d`
 else
     # Reuse the snapshot name from the index file
