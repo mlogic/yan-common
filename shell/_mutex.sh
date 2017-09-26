@@ -15,6 +15,13 @@
 #
 # This function uses FD 9 to open a lock on the file.  To release the lock, close FD 9:
 # exec 9>&-
+#
+# Caution: all child processes opened by your script would inherit FD 9. So the lock
+# would only be considered released when all the child processes are closed. If any
+# one of them lingers around, the lock is not released. If this not what you want,
+# run the command in a sub-bash shell and release FD 9, such as:
+# $ echo XXX | { encfs --stdinpass "$ENCFS" "$PLAINTEXT_MOUNT_POINT"; } 9>&-
+
 _mutex() {
     local file=$1 pid pids 
 
