@@ -38,6 +38,8 @@
   tasks:
   - name: start vm
     shell: if ! VBoxManage showvminfo {{ vm_name }} | egrep -q "State.*running"; then VBoxManage startvm {{ vm_name }} --type headless; fi
+    args:
+      executable: /bin/bash
 
   - name: waiting for host to come online
     wait_for: host={{ vm_name }}
