@@ -6,7 +6,7 @@
 #
 # Ref: http://unix.stackexchange.com/questions/79516/converting-pdf-to-pdf-a
 #
-# Copyright (c) 2016, 2017, Yan Li <yanli@ascar.io>,
+# Copyright (c) 2016-2018, Yan Li <yanli@tuneup.ai>,
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without

@@ -1,9 +1,9 @@
 # Function for using a pid file as a mutex
-#
-# The script was taken from http://stackoverflow.com/a/731634, which
-# doesn't specify a license so I assume it's in public domain. It may
-# contain changes done by Yan Li.  Copyright (c) 2016 Yan Li
-# <yanli@ascar.io>. All rights reserved.
+
+# This script was based on a script from http://stackoverflow.com/a/731634, which
+# doesn't specify a license so I assume it's in public domain.
+
+# Copyright (c) 2016-2018 Yan Li <yanli@tuneup.ai>. All rights reserved.
 
 # Open a mutual exclusion lock on the file, unless another process already owns one.
 #

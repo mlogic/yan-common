@@ -1,6 +1,6 @@
 # Function for check a condition with timeout
 # 
-# Copyright (c) 2016 Yan Li <yanli@ascar.io>. All rights reserved.
+# Copyright (c) 2016 Yan Li <yanli@tuneup.ai>. All rights reserved.
 # 
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are met:
