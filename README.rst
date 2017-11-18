@@ -16,7 +16,9 @@ requests.
   script for checking system health that should be run daily on
   servers and sending out emails.
 * os/start-virtualbox-vm.yaml: Ansible playbook for starting a
-  VirtualBox VM.
+  VirtualBox VM and waiting until it starts accepting SSH connection.
+* os/stop-virtualbox-vm.yaml: Ansible playbook for stop a
+  VirtualBox VM and waiting until it is fully stopped.
 * remote-backup: Incremental, differential, de-duplicated backup tool
   using zpaq (http://mattmahoney.net/dc/zpaq.html). This tool creates
   snapshots and uploads them to a remote host.
