@@ -28,6 +28,8 @@ requests.
   newly installed CentOS 7 system.
 * roles/mail-relay-gmx: set up a host to send outgoing emails through
   a GMX relay account.
+* roles/mysql-container: Start a MySQL container and wait until it
+  starts to accept incoming requests.
 * roles/reboot: Reboot a host and wait for it to come back online.
 * roles/local-security-scanners: Install and set up local security
   scanners (for now it only includes ClamAV). The local security scan
