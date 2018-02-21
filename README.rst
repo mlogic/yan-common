@@ -38,6 +38,7 @@ requests.
   is done weekly and any changes are mailed to you. Check
   `roles/local-security-scanners/README` for instructions.
 * roles/bootstrap-docker: Install Docker CE.
+* replace-text-block.py: Find and replace a block of text.
 
 Check out each tool for help information.
 
