@@ -30,7 +30,7 @@
   docker_container:
     name: "{{ mysql_container }}"
     hostname: "{{ mysql_container }}"
-    image: mysql
+    image: "{{ mysql_image | default('mysql') }}"
     pull: "{{ pull_new_image }}"
     state: started
     restart_policy: always
