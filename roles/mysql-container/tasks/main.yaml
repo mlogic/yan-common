@@ -46,8 +46,8 @@
   shell: docker exec -t "{{ mysql_container }}" sh -c 'echo show status | mysql -uroot -p{{ mysql_root_password }} || true'
   register: result
   until: result.stdout.find("Uptime") != -1
-  retries: 30
-  delay: 1
+  retries: 60
+  delay: 2
   when: state == 'started'
 
 - name: stop MySQL container
