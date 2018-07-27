@@ -55,10 +55,25 @@ else
     SNAPSHOT_NAME=`basename "${STAGING}"/*.index.zpaq | sed -e "s/.index.zpaq//g"`
 fi
 
-set +e
-nice $ZPAQ a "${STAGING}/${SNAPSHOT_NAME}-????" ${ZPAQOPT[@]} -index "${STAGING}/${SNAPSHOT_NAME}.index.zpaq"
-RC=$?
-set -e
+while true; do
+    set +e
+    /usr/bin/nice -n 19 /usr/bin/ionice -c2 -n7 $ZPAQ a "${STAGING}/${SNAPSHOT_NAME}-????" ${ZPAQOPT[@]} -index "${STAGING}/${SNAPSHOT_NAME}.index.zpaq" |&\
+    tee /tmp/remote-backup.out
+    RC=$?
+    set -e
+
+    # This error could happen if the last run was interrupted. We need to delete the
+    # last file and retry.
+    if grep -q "^zpaq error: archive exists$" /tmp/remote-backup.out; then
+        UNFINISHED_ARCHVIE=`ls "${STAGING}"/*.zpaq | grep -v "index.zpaq$" | tail -1`
+        echo "Cleaning up unfinished archive from previous run: $UNFINISHED_ARCHVIE"
+        rm "$UNFINISHED_ARCHVIE"
+        echo "Reruning zpaq..."
+    else
+        break
+    fi
+done
+
 # zpaq returns 0 on no error, 1 on warnings, and 2 on errors. We only stop on errors.
 if [ $RC -ge 2 ]; then
     exit $RC
