@@ -26,6 +26,16 @@
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ---
+- set_fact:
+    volumes_list_default:
+      - "{{ mysql_container_data_dir }}:/var/lib/mysql:rw,Z"
+
+# The default('') was necessary for making the parser happy
+- set_fact:
+    volumes_custom_cnf:
+      - "{{ mysql_custom_cnf | default('') }}:/etc/mysql/conf.d/custom.cnf:ro,Z"
+    when: mysql_custom_cnf is defined and mysql_custom_cnf != None
+
 - name: start MySQL container
   docker_container:
     name: "{{ mysql_container }}"
@@ -36,8 +46,8 @@
     restart_policy: always
     env:
       MYSQL_ROOT_PASSWORD: "{{ mysql_root_password }}"
-    volumes:
-    - "{{ mysql_container_data_dir }}:/var/lib/mysql:rw,Z"
+    # The () around (cond1 and cond2) is required!
+    volumes: "{{ (mysql_custom_cnf is defined and mysql_custom_cnf != None) | ternary(volumes_list_default | union(volumes_custom_cnf), volumes_list_default) }}"
     networks:
       - name: "{{ mysql_network_name }}"
   when: state == 'started'
@@ -48,6 +58,12 @@
   until: result.stdout.find("Uptime") != -1
   retries: 60
   delay: 2
+  when: state == 'started'
+
+# Sometimes the local mysqld.sock is not ready even after the above check.
+- name: pause for another 2 seconds just to be sure
+  pause:
+    seconds: 2
   when: state == 'started'
 
 - name: stop MySQL container

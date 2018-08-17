@@ -44,3 +44,4 @@
       mysql_container_data_dir: "/root/{{ lookup('ini', 'MYSQL_CONTAINER_DATA_DIR type=properties file=config') }}"
       mysql_root_password: "{{ lookup('ini', 'MYSQL_ROOT_PASSWORD type=properties file=config') }}"
       mysql_network_name: webfront
+      mysql_custom_cnf: optional.cnf
