@@ -39,6 +39,7 @@ requests.
   `roles/local-security-scanners/README` for instructions.
 * roles/bootstrap-docker: Install Docker CE.
 * replace-text-block.py: Find and replace a block of text.
+* roles/ipv6: Disable or enable IPv6.
 
 Check out each tool for help information.
 
@@ -46,12 +47,11 @@ Check out each tool for help information.
 Supported OS
 ============
 
-`CentOS <https://www.centos.org/>`_ (usually the latest and latest-1
-releases) is my work horse OS so most scripts here are tested on it. I
-also use `Debian <http://www.debian.org/>`_ (usually the stable and
-testing branches) but not all scripts are tested on Debian. I welcome
-patches for making them work on other OS and all other kinds of
-improvements.
+`CentOS 7 <https://www.centos.org/>`_ is my work horse OS so most
+scripts here are tested on it. I also use `Debian
+<http://www.debian.org/>`_ (usually the stable and testing branches)
+but not all scripts are tested on Debian. I welcome patches for making
+them work on other OS and all other kinds of improvements.
 
 Naming Convention
 =================

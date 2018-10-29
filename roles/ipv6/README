@@ -1,0 +1,14 @@
+# This role is used to enable or disable IPv6 on a host (tested on
+# CentOS 7 only).
+#
+# A sample playbook to use this role:
+---
+- hosts: all
+  become: yes
+  become_method: sudo
+  tasks:
+  - name: disable ipv6
+    import_role:
+      name: ipv6
+    vars:
+      enabled: no
