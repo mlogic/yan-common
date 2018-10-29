@@ -84,6 +84,6 @@ logrotate "$LRCONF"
 #
 # Don't use --log, because that would trigger SELinux warning on
 # clamscan trying to write to /var/log.
-clamscan --infected -r --exclude-dir="{{ exclude_dirs }}" / &>>${LOG}
+/usr/bin/nice -n 19 /usr/bin/ionice -c2 -n7 clamscan --infected -r --exclude-dir="{{ exclude_dirs }}" / &>>${LOG}
  
 check_scan
