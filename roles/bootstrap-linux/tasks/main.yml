@@ -85,7 +85,6 @@
     - fish
     - mg
     - moreutils
-    - tig
   when: ansible_os_family == "Debian"
 
 - name: enable yum-cron
