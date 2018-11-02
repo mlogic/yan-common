@@ -99,8 +99,7 @@
 
 - name: passwordless ssh for root
   authorized_key: user=root key="{{ lookup('file', '~/.ssh/id_rsa.pub') }}"
-  when: inventory_hostname != "localhost"
-  when: sshd_conf.stat.exists == True
+  when: inventory_hostname != "localhost" and sshd_conf.stat.exists == True
 
 - name: disable DNS in sshd
   lineinfile:
