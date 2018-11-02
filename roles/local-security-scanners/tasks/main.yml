@@ -25,11 +25,16 @@
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ---
-- name: install packages
+- name: install packages for RedHat
   yum: name=clamav,clamav-update,logrotate
        state=latest
+  when: ansible_os_family == "RedHat"
 
-- name: enable freshclam
+- name: install packages for Debian
+  apt: name=clamav
+  when: ansible_os_family == "Debian"
+
+- name: enable freshclam for RedHat
   lineinfile:
     dest:   /etc/freshclam.conf
     regexp: "{{ item.regexp }}"
@@ -38,12 +43,26 @@
     - { regexp: 'Example$', line: '# Example' }
     - { regexp: 'DatabaseMirror db\...\.clamav\.net', line: 'DatabaseMirror db.us.clamav.net' }
     - { regexp: 'Checks', line: 'Checks 1' }
+  when: ansible_os_family == "RedHat"
 
 - name: enable freshclam in sysconfig
   lineinfile:
     dest:   /etc/sysconfig/freshclam
     regexp: "^FRESHCLAM_DELAY=disabled-warn.*"
     state:  absent
+  when: ansible_os_family == "RedHat"
+
+- name: enable freshclam for Debian
+  debconf:
+    name: clamav-freshclam
+    question: "{{ item.question }}"
+    vtype: "{{ item.vtype }}"
+    value: "{{ item.value }}"
+  with_items:
+    - { question: 'clamav-freshclam/Bytecode', vtype: 'boolean', value: 'true' }
+    - { question: 'clamav-freshclam/update_interval', vtype: 'string', value: '1' }
+    - { question: 'clamav-freshclam/LogRotate', vtype: 'boolean', value: 'true' }
+  when: ansible_os_family == "Debian"
 
 - name: clamav log directory
   file: path=/var/log/clamav
