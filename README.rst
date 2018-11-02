@@ -2,8 +2,7 @@ INTRODUCTION
 ============
 
 Yan's collection of scripts for daily chores. Use at your own risk!
-There is no warranty. But I do welcome comments/issues/pull
-requests.
+There is no warranty, but I do welcome comments/issues/pull requests.
 
 * del: Use this instead of rm because rm is too risky. del uses /tmp
   as a recycle bin so you can recover your files until you reboot.
@@ -26,8 +25,8 @@ requests.
   timeout.
 * vbox-remove-old-auto-snapshots.sh: A tool for keeping a certain
   number of VirtualBox snapshots and removing the older ones.
-* roles/bootstrap-centos7: default tasks that need to be done on any
-  newly installed CentOS 7 system.
+* roles/bootstrap: default tasks that need to be done on all my newly
+  installed Debian/Ubuntu/CentOS 7 systems.
 * roles/mail-relay-gmx: set up a host to send outgoing emails through
   a GMX relay account.
 * roles/mysql-container: Start a MySQL container and wait until it
@@ -41,17 +40,18 @@ requests.
 * replace-text-block.py: Find and replace a block of text.
 * roles/ipv6: Disable or enable IPv6.
 
-Check out each tool for help information.
+Check out the README file of each tool for help information.
 
 
 Supported OS
 ============
 
-`CentOS 7 <https://www.centos.org/>`_ is my work horse OS so most
-scripts here are tested on it. I also use `Debian
-<http://www.debian.org/>`_ (usually the stable and testing branches)
-but not all scripts are tested on Debian. I welcome patches for making
-them work on other OS and all other kinds of improvements.
+`Ubuntu 18.10 <https://www.ubuntu.com/>`_ and `CentOS 7
+<https://www.centos.org/>`_ are my work horse OS so most scripts here
+are tested on them. I also use `Debian <http://www.debian.org/>`_
+(usually the stable and testing branches) but not all scripts are
+tested on Debian. I welcome patches for making these scripts work on
+other OS and other kinds of improvements.
 
 Naming Convention
 =================
