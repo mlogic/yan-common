@@ -12,11 +12,16 @@ There is no warranty, but I do welcome comments/issues/pull requests.
   lossless webp and preserve metadata. Useful for reduce the space for
   archiving large images that need lossless compression.
 * os/clean-up-dangling-docker-images.sh
-* os/os/clean-up-remote-dangling-docker-images.sh: Clean up dangling
+* os/clean-up-remote-dangling-docker-images.sh: Clean up dangling
   (unused) docker images to save disk space on a remote host via ssh.
 * os/{daily-health-monitor.sh,enable-health-monitors.yaml}: Handy
   script for checking system health that should be run daily on
   servers and sending out emails.
+* os/git-compare-remote.sh: Check if a git-repo against its remote
+  branch.
+* os/is-{debian/rhel}.sh: Distro detection.
+* os/pull-docker-base-image.sh: Pull the base image referred to by a
+  dockerfile.
 * os/start-virtualbox-vm.yaml: Ansible playbook for starting a
   VirtualBox VM and waiting until it starts accepting SSH connection.
 * os/stop-virtualbox-vm.yaml: Ansible playbook for stop a
