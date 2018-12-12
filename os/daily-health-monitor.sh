@@ -32,7 +32,7 @@
 # https://www.digitalocean.com/community/tutorials/how-to-send-e-mail-alerts-on-a-centos-vps-for-system-monitoring
 set -e -u
 cd `dirname $0`
-. config
+. ./config
 
 CURRENT=$(df / | grep / | awk '{ print $5}' | sed 's/%//g')
 THRESHOLD=90
