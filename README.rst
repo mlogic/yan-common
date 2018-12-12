@@ -33,8 +33,8 @@ There is no warranty, but I do welcome comments/issues/pull requests.
   timeout.
 * vbox-remove-old-auto-snapshots.sh: A tool for keeping a certain
   number of VirtualBox snapshots and removing the older ones.
-* roles/bootstrap: default tasks that need to be done on all my newly
-  installed Debian/Ubuntu/CentOS 7 systems.
+* roles/bootstrap-linux: default tasks that need to be done on all my
+  newly installed Debian/Ubuntu/CentOS 7 systems.
 * roles/mail-relay-gmx: set up a host to send outgoing emails through
   a GMX relay account.
 * roles/mysql-container: Start a MySQL container and wait until it
