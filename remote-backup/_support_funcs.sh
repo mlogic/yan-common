@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # Library function for remote backup
 #
 # Copyright (c) 2016-2018, Yan Li <yanli@tuneup.ai>,

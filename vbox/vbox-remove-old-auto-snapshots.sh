@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # VirtualBox: Remove old auto snapshots
 #
 # Copyright (c) 2015-2018, Yan Li <yanli@tuneup.ai>,

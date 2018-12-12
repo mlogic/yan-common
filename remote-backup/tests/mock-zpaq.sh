@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # Mock zpaq for testing
 #
 # Copyright (c) 2016-2018, Yan Li <yanli@tuneup.ai>,

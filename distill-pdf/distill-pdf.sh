@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # Distill a PDF using Ghostscript. You have the option to generate a
 # PDF/A-2b (default) or PDF/X compliant document. Due to bugs of
 # Ghostscript, sometimes the result might not be fully compliant but

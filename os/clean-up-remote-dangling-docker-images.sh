@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # Clean up dangling (unused) docker images to save disk space on a remote host
 # via ssh
 #

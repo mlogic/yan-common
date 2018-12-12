@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # Show the major distro version from /etc/os-release
 #
 # Copyright (c) 2016-2018, Yan Li <yanli@tuneup.ai>,

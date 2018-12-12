@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # Pull the image refered to in a dockerfile
 #
 # Copyright (c) 2016-2018, Yan Li <yanli@tuneup.ai>,

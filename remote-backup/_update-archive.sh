@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # Create/update local backup archvie using zpaq
 # 
 # Copyright (c) 2016-2018, Yan Li <yanli@tuneup.ai>,

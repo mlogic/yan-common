@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # Remove all docker containers
 #
 # Copyright (c) 2016-2018, Yan Li <yanli@tuneup.ai>,

@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # Compare local and remote git branches
 #
 # Based on a script from https://stackoverflow.com/a/3278427

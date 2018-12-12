@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # A Health Monitor That Should Be Run Daily
 #
 # Copyright (c) 2016-2018, Yan Li <yanli@tuneup.ai>,

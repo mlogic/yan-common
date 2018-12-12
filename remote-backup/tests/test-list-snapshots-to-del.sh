@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # Test case for test-old-snapshot-to-del
 # 
 # Copyright (c) 2016-2018, Yan Li <yanli@tuneup.ai>,

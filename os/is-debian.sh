@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # Test if the current distro is Debian-flavored (Ubuntu, etc.)
 #
 # Copyright (c) 2016-2018, Yan Li <yanli@tuneup.ai>,

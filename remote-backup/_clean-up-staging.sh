@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # Upload archives in the staging area using scp
 #
 # Copyright (c) 2016-2018, Yan Li <yanli@tuneup.ai>,

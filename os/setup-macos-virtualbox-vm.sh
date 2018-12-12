@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # Set up a VirtualBox virtual machine to run macOS Sierra
 #
 # Based on
