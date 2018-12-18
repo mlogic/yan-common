@@ -29,7 +29,7 @@
 # LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
 # NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-set -e -u
+set -euo pipefail
 
 if [ x${1:-} = x-h ]; then
     cat<<EOF
@@ -55,9 +55,9 @@ EOF
 fi
 
 UPSTREAM=${1:-'@{u}'}
-LOCAL=$(git rev-parse @)
+LOCAL=$(git rev-parse HEAD)
 REMOTE=$(git rev-parse "$UPSTREAM")
-BASE=$(git merge-base @ "$UPSTREAM")
+BASE=$(git merge-base HEAD "$UPSTREAM")
 
 if [ $LOCAL = $REMOTE ]; then
     echo "Up-to-date"
