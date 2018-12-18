@@ -30,7 +30,7 @@
 #
 # Based on a script from
 # https://www.digitalocean.com/community/tutorials/how-to-send-e-mail-alerts-on-a-centos-vps-for-system-monitoring
-set -e -u
+set -euo pipefail
 cd `dirname $0`
 . ./config
 
