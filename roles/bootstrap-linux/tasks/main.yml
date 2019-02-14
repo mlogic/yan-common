@@ -26,6 +26,16 @@
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ---
+- name: enable journald persistent log
+  file:
+    path: /var/log/journal
+    state: directory
+    owner: root
+    group: root
+
+# journald manages its disk space use automatically by default. See
+# journald.conf(5) for details.
+
 - name: use purge for apt remove
   lineinfile:
     dest: /etc/apt/apt.conf.d/99YANpurge
