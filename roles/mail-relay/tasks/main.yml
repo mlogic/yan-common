@@ -1,4 +1,4 @@
-# Set up the host to send outgoing emails through a GMX relay
+# Set up the host to send outgoing emails through a relay
 #
 # Copyright (c) 2016-2018, Yan Li <yanli@tuneup.ai>,
 # All rights reserved.
@@ -51,7 +51,7 @@
   with_items:
     - { question: 'postfix/mailname', vtype: 'string', value: '{{ ansible_hostname }}' }
     - { question: 'postfix/main_mailer_type', vtype: 'select', value: 'Satellite system' }
-    - { question: 'postfix/relayhost', vtype: 'string', value: '[mail.gmx.com]:587' }
+    - { question: 'postfix/relayhost', vtype: 'string', value: '[{{ smtp_server }}]:587' }
   when: ansible_os_family == "Debian"
 
 - name: ansible_managed in postfix/main.cf
@@ -67,7 +67,7 @@
     line:   "{{ item.line }}"
   with_items:
     - { regexp: '^myhostname', line: 'myhostname = {{ ansible_hostname }}' }
-    - { regexp: '^relayhost', line: 'relayhost = [mail.gmx.com]:587' }
+    - { regexp: '^relayhost', line: 'relayhost = [{{ smtp_server }}]:587' }
     - { regexp: '^smtp_use_tls', line: 'smtp_use_tls = yes' }
     - { regexp: '^smtp_sasl_auth_enable', line: 'smtp_sasl_auth_enable = yes' }
     - { regexp: '^smtp_sasl_password_maps', line: 'smtp_sasl_password_maps = hash:/etc/postfix/sasl_passwd' }
@@ -75,7 +75,7 @@
     - { regexp: '^smtp_sasl_tls_security_options', line: 'smtp_sasl_tls_security_options = noanonymous' }
     # we don't want postfix to append .localdomain to the sender address
     - { regexp: '^append_dot_mydomain', line: 'append_dot_mydomain = no' }
-    # Rewrite sender address because gmx verifies that. See https://serverfault.com/questions/147921/forcing-the-from-address-when-postfix-relays-over-smtp
+    # Rewrite sender address because GMX verifies that. See https://serverfault.com/questions/147921/forcing-the-from-address-when-postfix-relays-over-smtp
     - { regexp: '^sender_canonical_classes', line: 'sender_canonical_classes = envelope_sender, header_sender' }
     - { regexp: '^sender_canonical_maps', line: 'sender_canonical_maps =  regexp:/etc/postfix/canonical' }
     - { regexp: '^smtp_header_checks', line: 'smtp_header_checks = regexp:/etc/postfix/header_checks' }
@@ -117,8 +117,8 @@
 - name: config postfix/sasl_passwd
   lineinfile:
     dest:   /etc/postfix/sasl_passwd
-    regexp: '[mail.gmx.com]:'
-    line: '[mail.gmx.com]:587 {{ gmx_account }}'
+    regexp: '[{{ smtp_server }}]:'
+    line: '[{{ smtp_server }}]:587 {{ mail_account }}'
     create: yes
   register:
     sasl_passwd

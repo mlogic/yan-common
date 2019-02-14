@@ -1,0 +1,18 @@
+# This role is used to set up a host to send all outgoing emails
+# through a relay by using Postfix (tested on CentOS 7/Ubuntu
+# 18.10). Tested with Gmail and GMX.
+#
+#
+# A sample playbook to use this role:
+---
+- hosts: all
+  become: yes
+  become_method: sudo
+  vars:
+    - from_addr: my_account@gmail.com
+    - map_root_to: my_receiving_account@personal.com
+    - mail_account: my_account@gmail.com:PASSWORD_HERE
+    # Use smtp.gmail.com for Gmail and mail.gmx.com for gmx.com.
+    - smtp_server: smtp.gmail.com
+  roles:
+  - mail-relay
