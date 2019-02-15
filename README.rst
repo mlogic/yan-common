@@ -19,6 +19,8 @@ There is no warranty, but I do welcome comments/issues/pull requests.
   servers and sending out emails.
 * os/git-compare-remote.sh: Check if a git-repo against its remote
   branch.
+* os/if-bytes-warn.sh: Check the bytes sent from all NICs and sent a
+  warning email or run a command.
 * os/is-{debian/rhel}.sh: Distro detection.
 * os/pull-docker-base-image.sh: Pull the base image referred to by a
   dockerfile.
