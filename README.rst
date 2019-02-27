@@ -11,6 +11,8 @@ There is no warranty, but I do welcome comments/issues/pull requests.
 * media/to-webp-lossless.sh: Convert images to best-compression
   lossless webp and preserve metadata. Useful for reduce the space for
   archiving large images that need lossless compression.
+* media/to-png.sh: Convert images to best-compression lossless png
+  using optipng.
 * os/clean-up-dangling-docker-images.sh
 * os/clean-up-remote-dangling-docker-images.sh: Clean up dangling
   (unused) docker images to save disk space on a remote host via ssh.
