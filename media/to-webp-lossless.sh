@@ -55,17 +55,27 @@ fi
 for file in "$@"; do
     basename="${file%.*}"
     ext="${file##*.}"
-    if [ "${ext,,}" != "png" -a "${ext,,}" != "tif" ]; then
-        # cwebp doesn't take most formats other than png/tif. We just convert all
-        # others to png for simplicity.
+    if [ "${ext,,}" != "png" ]; then
+        # cwebp doesn't take most formats other than png (it could
+        # read some tif but not all). We just convert all others to
+        # png for simplicity.
 
-        # Remove residual files from before. Some files like mimg-compress-1.png
-        # might still exist.
+        # Remove residual files from before. Some files like
+        # mimg-compress-1.png might still exist.
         rm -f /tmp/mimg-compress*.png
 
-        convert "$file" /tmp/mimg-compress.png
-        # Certain files such as TIF could have more than one image, and convert
-        # will output more than one file. We pick the largest one to use.
+        if [ "${ext,,}" = "tif" ]; then
+            # Use GraphicsMagick for TIF because ImageMagick's TIF
+            # handling is so broken.
+            gm convert "$file" /tmp/mimg-compress.png
+        else
+            # GraphicsMagick doesn't support PSD. So we have to use
+            # ImagicMagick for other formats.
+            convert "$file" /tmp/mimg-compress.png
+        fi
+        # Certain files such as TIF could have more than one image,
+        # and convert will output more than one file. We pick the
+        # largest one to use.
         tmpfile=`ls -S /tmp/mimg-compress*.png | head -1`
     else
         tmpfile="$file"
