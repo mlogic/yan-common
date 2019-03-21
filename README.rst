@@ -13,9 +13,6 @@ There is no warranty, but I do welcome comments/issues/pull requests.
   archiving large images that need lossless compression.
 * media/to-png.sh: Convert images to best-compression lossless png
   using optipng.
-* os/clean-up-dangling-docker-images.sh
-* os/clean-up-remote-dangling-docker-images.sh: Clean up dangling
-  (unused) docker images to save disk space on a remote host via ssh.
 * os/{daily-health-monitor.sh,enable-health-monitors.yaml}: Handy
   script for checking system health that should be run daily on
   servers and sending out emails.
