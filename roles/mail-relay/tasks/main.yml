@@ -117,7 +117,7 @@
 - name: config postfix/sasl_passwd
   lineinfile:
     dest:   /etc/postfix/sasl_passwd
-    regexp: '[{{ smtp_server }}]:'
+    regexp: '\[{{ smtp_server }}\]:'
     line: '[{{ smtp_server }}]:587 {{ mail_account }}'
     create: yes
   register:
