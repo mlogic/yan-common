@@ -35,6 +35,7 @@
 #  - include: enable-health-monitors.yml mailto=foo@bar.com
 
 - hosts: all
+  become: yes
   tasks:
   - name: check script directory
     file: dest=/root/bin state=directory
