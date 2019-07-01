@@ -80,10 +80,12 @@ logrotate "$LRCONF"
  
 # --infected: don't report OK files
 # -r: recursive
-# --detect-pua: detect possible unwanted applications
+# --phishing-scan-urls is disabled because it generates too many false
+#                      positives while scanning emails
 #
 # Don't use --log, because that would trigger SELinux warning on
 # clamscan trying to write to /var/log.
-/usr/bin/nice -n 19 /usr/bin/ionice -c2 -n7 clamscan --infected -r --exclude-dir="{{ exclude_dirs }}" / &>>${LOG}
+/usr/bin/nice -n 19 /usr/bin/ionice -c2 -n7 clamscan --infected -r \
+              --exclude-dir="{{ exclude_dirs }}" --phishing-scan-urls=no / &>>${LOG}
  
 check_scan
