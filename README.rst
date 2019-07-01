@@ -21,6 +21,9 @@ There is no warranty, but I do welcome comments/issues/pull requests.
 * os/if-bytes-warn.sh: Check the bytes sent from all NICs and sent a
   warning email or run a command.
 * os/is-{debian/rhel}.sh: Distro detection.
+* os/powertune.sh: Run `powertop --auto-tune` but disable autosuspend
+  for USB HID device because autosuspend could make most of them
+  unusable.
 * os/pull-docker-base-image.sh: Pull the base image referred to by a
   dockerfile.
 * os/start-virtualbox-vm.yaml: Ansible playbook for starting a
