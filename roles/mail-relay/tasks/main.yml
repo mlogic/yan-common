@@ -149,10 +149,17 @@
 #     create: yes
 
 - name: secure sasl files owner
+  # Disable warning. It's just easier to use wildcard here to match
+  # sasl_passwd and the generated file sasl_passwd.db (we are not sure
+  # if the db file name is fixed).
   shell: chown root:postfix /etc/postfix/sasl_passwd*
+  args:
+    warn: false
 
 - name: secure sasl files mode
   shell: chmod 640 /etc/postfix/sasl_passwd*
+  args:
+    warn: false
 
 - name: reload postfix service
   service: name=postfix state=reloaded enabled=yes
