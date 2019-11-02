@@ -31,7 +31,7 @@
     path: /var/log/journal
     state: directory
     owner: root
-    group: root
+    group: systemd-journal
 
 # journald manages its disk space use automatically by default. See
 # journald.conf(5) for details.
@@ -44,8 +44,8 @@
     create: True
   when: ansible_os_family == "Debian"
 
-- name: install packages first batch
-  yum: name=epel-release,libselinux-python,wget,deltarpm,unzip,util-linux
+- name: install packages first batch for Red Hat
+  yum: name=epel-release,libselinux-python,wget,unzip,util-linux
        state=latest
   when: ansible_os_family == "RedHat"
 
@@ -72,30 +72,15 @@
   when: ansible_os_family == "RedHat"
 
 - name: update all packages for Debian
-  apt: upgrade=safe
+  apt: upgrade=safe update_cache=yes
   when: ansible_os_family == "Debian"
 
 - name: install packages second batch
-  yum: name={{ item }} state=latest
-  with_items:
-    - bc
-    - bzip2
-    - fish
-    - mg
-    - moreutils
-    - yum-cron
-    - yum-utils
+  yum: name=bc,bzip2,mg,moreutils,yum-cron,yum-utils state=latest
   when: ansible_os_family == "RedHat"
 
 - name: install packages for Debian
-  apt:
-    name: "{{ packages }}"
-  vars:
-    packages:
-    - fish
-    - mg
-    - moreutils
-    - net-tools
+  apt: name=mg,moreutils,needrestart,net-tools state=latest
   when: ansible_os_family == "Debian"
 
 - name: enable yum-cron
