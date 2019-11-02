@@ -1,4 +1,4 @@
-# This playbook installs Docker CE
+# This playbook installs Docker for CentOS/RHEL/Ubuntu/Debian
 #
 # Copyright (c) 2016-2018, Yan Li <yanli@tuneup.ai>,
 # All rights reserved.
@@ -25,26 +25,50 @@
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ---
-- name: Install packages first batch
-  yum: name=yum-utils,device-mapper-persistent-data,lvm2
+- name: check docker for Red Hat systems
+  shell: rpm -qa | grep -q docker
+  register: docker_checker
+  ignore_errors: True
+  # Ansible doesn't like rpm and always wants us to use yum. Disable warn for this command:
+  args:
+    warn: false
+  when: ansible_os_family == "RedHat"
+
+- name: check docker for Debian/Ubuntu systems
+  shell: dpkg -l | grep -E "docker-ce|docker.io"
+  register: docker_checker
+  ignore_errors: True
+  when: ansible_os_family == "Debian"
+
+- name: install official docker repo
+  shell: curl -fsSL https://get.docker.com/ | sh
+  when: ansible_os_family == "RedHat" and docker_checker is failed
+
+- name: install docker dependency packages
+  yum: name=python-docker-py,device-mapper-event-libs
        state=latest
+  when: ansible_os_family == "RedHat" and docker_checker is failed
 
-# This is the simpliest way to install a repo file from an URL. And we run this
-# everytime so we can get the latest repo file.
-- name: Add Docker stable repository
-  shell: yum-config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo
+- name: install Ubuntu docker package
+  apt:
+    name:
+      - docker.io
+      - python3-docker
+  when: ansible_os_family == "Debian" and docker_checker is failed
 
-# Warning: on production systems, you should install a specific
-# version of Docker CE instead of always using the latest.
-- name: Install docker-ce package
-  yum: name=docker-ce
-       state=latest
+- name: enable docker engine service
+  service: name=docker state=started enabled=yes
 
-# Enable docker service on boot
-- service:
-    name: docker
-    enabled: yes
+- name: check dockersock selinux module
+  shell: semodule -l | grep -q dockersock
+  register: dockersock_checker
+  ignore_errors: True
+  when: ansible_os_family == "RedHat"
 
-- service:
-    name: docker
-    state: restarted
+- name: copy dockersock selinux module
+  copy: src=dockersock.pp dest=/tmp/dockersock.pp
+  when: ansible_os_family == "RedHat" and dockersock_checker is failed
+
+- name: load dockersock selinux module
+  command: semodule -i /tmp/dockersock.pp
+  when: ansible_os_family == "RedHat" and dockersock_checker is failed
