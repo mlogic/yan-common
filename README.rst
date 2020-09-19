@@ -26,6 +26,7 @@ There is no warranty, but I do welcome comments/issues/pull requests.
   unusable.
 * os/pull-docker-base-image.sh: Pull the base image referred to by a
   dockerfile.
+* os/run-until-success.sh: Run a command until success.
 * os/start-virtualbox-vm.yaml: Ansible playbook for starting a
   VirtualBox VM and waiting until it starts accepting SSH connection.
 * os/stop-virtualbox-vm.yaml: Ansible playbook for stop a
@@ -62,8 +63,14 @@ Supported OS
 <https://www.centos.org/>`_ are my work horse OS so most scripts here
 are tested on them. I also use `Debian <http://www.debian.org/>`_
 (usually the stable and testing branches) but not all scripts are
-tested on Debian. I welcome patches for making these scripts work on
-other OS and other kinds of improvements.
+tested on Debian. Patches for supporting other OS and any kinds of
+improvements are always welcome!
+
+TODO
+====
+
+* Many scripts lack test cases.
+
 
 Naming Convention
 =================
