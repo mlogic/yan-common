@@ -5,7 +5,7 @@
 # TODO:
 # 1. test cases
 
-. "${YAN_COMMON}/shell/_base.sh"
+. "${YAN_COMMON}/shell/_log.sh"
 . "${YAN_COMMON}/shell/_mutex.sh"
 
 set -euo pipefail
@@ -35,7 +35,8 @@ while :; do
             break
             ;;
         *)
-            die "unknown option"
+            err "Unknown option: $1"
+            exit 2
             ;;
     esac
     shift
