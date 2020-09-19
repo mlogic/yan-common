@@ -83,6 +83,11 @@
   apt: name=mg,moreutils,needrestart,net-tools state=latest
   when: ansible_os_family == "Debian"
 
+- name: remove dependencies that are no longer required for Debian
+  apt:
+    autoremove: yes
+    purge: yes
+
 - name: enable yum-cron
   service: name=yum-cron enabled=yes state=started
   when: ansible_os_family == "RedHat"
