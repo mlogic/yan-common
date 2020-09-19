@@ -1,7 +1,6 @@
-#!/usr/bin/env bash
-# Upload archives in the staging area using scp
+# Logging functions
 #
-# Copyright (c) 2016-2018, Yan Li <yanli@tuneup.ai>,
+# Copyright (c) 2016-2020, Yan Li <yanli@tuneup.ai>,
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -25,34 +24,10 @@
 # CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-set -euo pipefail
-if [ -n "${DEBUG:-}" ]; then set -x; fi
-. "$CONFIG"
-. `dirname $0`/../shell/_log.sh
 
-if [ -e $LOCK ]; then
-    echo "Lock file exist, exiting: $LOCK"
-    exit 3
-fi
-cleanup() {
-    rm -f $LOCK
+
+# A function to print out error messages along with other status
+# information.
+err() {
+  echo "[$(date +'%Y-%m-%dT%H:%M:%S%z')]: $*" >&2
 }
-trap cleanup EXIT
-echo $$ >$LOCK
-
-# We don't need to copy the index file.
-case "${REMOTE_TYPE}" in
-    ssh)
-	scp -i "$SSH_ID" "${STAGING}"/snapshot-*-*-*-*.zpaq "${REMOTE}:${REMOTE_DIR}"
-	;;
-    rclone)
-	# rclone can only copy one file a time
-	for file in "${STAGING}"/snapshot-*-*-*-*.zpaq; do
-	    rclone copy "${file}" "${REMOTE}:${REMOTE_DIR}"
-	done
-	;;
-    *)
-	err "Unknown REMOTE_TYPE: ${REMOTE_TYPE}"
-	exit 3
-	;;
-esac

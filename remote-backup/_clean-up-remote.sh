@@ -28,12 +28,37 @@
 set -euo pipefail
 if [ -n "${DEBUG:-}" ]; then set -x; fi
 . "$CONFIG"
+. `dirname $0`/../shell/_log.sh
 . `dirname $0`/_support_funcs.sh
 
 if [ $REMOTE_FULL_SNAPSHOTS_TO_KEEP ]; then
-    REMOTE_SS=`ssh -i "$SSH_ID" "$REMOTE" ls "${REMOTE_DIR}/*"`
-    SS_TO_DEL=`list-snapshots-to-del "$REMOTE_SS" $REMOTE_FULL_SNAPSHOTS_TO_KEEP`
+    case "${REMOTE_TYPE}" in
+	ssh)
+	    REMOTE_SS="$(ssh -i "$SSH_ID" "$REMOTE" ls "${REMOTE_DIR}/*")"
+	    ;;
+	rclone)
+	    REMOTE_SS="$(rclone ls "${REMOTE}:${REMOTE_DIR}" | awk '{print $2}')"
+	    ;;
+	*)
+	    err "Unknown REMOTE_TYPE: ${REMOTE_TYPE}"
+	    exit 3
+	    ;;
+    esac
+    SS_TO_DEL="$(list-snapshots-to-del "$REMOTE_SS" $REMOTE_FULL_SNAPSHOTS_TO_KEEP)"
     if [ -n "$SS_TO_DEL" ]; then
-        echo "$SS_TO_DEL" | xargs ssh -i "$SSH_ID" "$REMOTE" rm
+	case "${REMOTE_TYPE}" in
+	    ssh)
+		echo "$SS_TO_DEL" | xargs ssh -i "$SSH_ID" "$REMOTE" rm
+		;;
+	    rclone)
+		for file in ${SS_TO_DEL}; do
+		    rclone delete "${REMOTE}:${REMOTE_DIR}/${file}"
+		done
+		;;
+	    *)
+		err "Unknown REMOTE_TYPE: ${REMOTE_TYPE}"
+		exit 3
+		;;
+	esac
     fi
 fi

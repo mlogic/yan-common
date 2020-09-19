@@ -28,6 +28,7 @@
 set -euo pipefail
 if [ -n "${DEBUG:-}" ]; then set -x; fi
 . "$CONFIG"
+. `dirname $0`/../shell/_log.sh
 
 if [ -e $LOCK ]; then
     echo "Lock file exist, exiting: $LOCK"
@@ -55,16 +56,17 @@ else
     SNAPSHOT_NAME=`basename "${STAGING}"/*.index.zpaq | sed -e "s/.index.zpaq//g"`
 fi
 
+STDOUT_FILE_NAME="$(mktemp /tmp/remote-backup-XXXXXXX.out)"
 while true; do
     set +e
     /usr/bin/nice -n 19 /usr/bin/ionice -c2 -n7 $ZPAQ a "${STAGING}/${SNAPSHOT_NAME}-????" ${ZPAQOPT[@]} -index "${STAGING}/${SNAPSHOT_NAME}.index.zpaq" |&\
-    tee /tmp/remote-backup.out
+    tee "${STDOUT_FILE_NAME}"
     RC=$?
     set -e
 
     # This error could happen if the last run was interrupted. We need to delete the
     # last file and retry.
-    if grep -q "^zpaq error: archive exists$" /tmp/remote-backup.out; then
+    if grep -q "^zpaq error: archive exists$" "${STDOUT_FILE_NAME}"; then
         UNFINISHED_ARCHVIE=`ls "${STAGING}"/*.zpaq | grep -v "index.zpaq$" | tail -1`
         echo "Cleaning up unfinished archive from previous run: $UNFINISHED_ARCHVIE"
         rm "$UNFINISHED_ARCHVIE"
