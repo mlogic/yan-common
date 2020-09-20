@@ -25,9 +25,27 @@
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-
-# A function to print out error messages along with other status
-# information.
-err() {
-  echo "[$(date +'%Y-%m-%dT%H:%M:%S%z')]: $*" >&2
+log() {
+  local -r level=$1
+  shift
+  local -r log_level_var=LOG_${level^^}
+  local prefix
+  prefix="${LOG_PREFIX:-[$(date +'%Y-%m-%dT%H:%M:%S%z')] ${LOG_IDENTIFIER:-}, ${level}:}"
+  for dest in ${!log_level_var:-stdout}; do
+    case $dest in
+      stdout)
+        echo "$prefix $@"
+        ;;
+      stderr)
+        echo "$prefix $@" >&2
+        ;;
+      syslog)
+        echo "$@" | systemd-cat -p ${level}
+        ;;
+      *)
+        echo "Unknown log dest for level ${level}: ${dest}"
+        exit 1
+        ;;
+    esac
+  done
 }
