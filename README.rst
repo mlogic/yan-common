@@ -75,8 +75,15 @@ TODO
 Naming Convention
 =================
 
-Generally scripts that begin with _ are support scripts that will be
-called by other scripts.
+I try to follow Google's style as closely as possible:
+* `Google Shell Style Guide
+  <https://google.github.io/styleguide/shellguide.html>`_
+
+Scripts that begin with `_` are support scripts that generally
+shouldn't be called by users directly.
+
+Code that doesn't conform to the style guide will be fixed
+gradually. Patches are welcome!
 
 
 Test Status
