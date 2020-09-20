@@ -3,6 +3,6 @@ PATH=/sbin:/bin:/usr/sbin:/usr/bin
 MAILTO=root
 
 # period(days) delay(minutes)
-1  0 rsnapshot_encfs_mydataset_daily chronic /home/my/yan-common/os/run-until-success.sh --retry_gap 30minute --stop_rc 9 --task_name rsnapshot_encfs_mydataset_daily -- /home/my/yan-common/rsnapshot_encfs/rsnapshot_encfs.sh ~/.config/rsnapshot_encfs_mydataset.config sync daily
-7  0 rsnapshot_encfs_mydataset_daily chronic /home/my/yan-common/os/run-until-success.sh --retry_gap 30minute --stop_rc 9 --task_name rsnapshot_encfs_mydataset_daily -- /home/my/yan-common/rsnapshot_encfs/rsnapshot_encfs.sh ~/.config/rsnapshot_encfs_mydataset.config weekly
-30  0 rsnapshot_encfs_mydataset_daily chronic /home/my/yan-common/os/run-until-success.sh --retry_gap 30minute --stop_rc 9 --task_name rsnapshot_encfs_mydataset_daily -- /home/my/yan-common/rsnapshot_encfs/rsnapshot_encfs.sh ~/.config/rsnapshot_encfs_mydataset.config monthly
+1  0 rsnapshot_encfs_mydataset_daily chronic /home/yanli/yan-common/os/run-until-success.sh --retry_gap 30minute --stop_rc 9 --task_name rsnapshot_encfs_mydataset_daily -- /home/yanli/yan-common/rsnapshot_encfs/rsnapshot_encfs.sh /home/yanli/.config/rsnapshot_encfs_mydataset.config sync daily
+7  0 rsnapshot_encfs_mydataset_weekly chronic /home/yanli/yan-common/os/run-until-success.sh --retry_gap 30minute --stop_rc 9 --task_name rsnapshot_encfs_mydataset_weekly -- /home/yanli/yan-common/rsnapshot_encfs/rsnapshot_encfs.sh /home/yanli/.config/rsnapshot_encfs_mydataset.config weekly
+30  0 rsnapshot_encfs_mydataset_monthly chronic /home/yanli/yan-common/os/run-until-success.sh --retry_gap 30minute --stop_rc 9 --task_name rsnapshot_encfs_mydataset_monthly -- /home/yanli/yan-common/rsnapshot_encfs/rsnapshot_encfs.sh /home/yanli/.config/rsnapshot_encfs_mydataset.config monthly
