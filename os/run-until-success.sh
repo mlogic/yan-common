@@ -31,8 +31,10 @@
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 set -euo pipefail
 
-. "${YAN_COMMON}/shell/_log.sh"
-. "${YAN_COMMON}/shell/_mutex.sh"
+YAN_COMM="$(dirname $0)/.."
+readonly YAN_COMM
+. "${YAN_COMM}/shell/_log.sh"
+. "${YAN_COMM}/shell/_mutex.sh"
 
 readonly orig_cmd_opt=("$@")
 force=0
