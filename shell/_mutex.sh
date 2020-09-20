@@ -23,14 +23,18 @@
 # $ echo XXX | { encfs --stdinpass "$ENCFS" "$PLAINTEXT_MOUNT_POINT"; } 9>&-
 
 _mutex() {
-    local file=$1 pid pids 
+  local file=$1 pid pids
 
-    exec 9>>"$file"
-    { pids=$(fuser -f "$file"); } 2>&- 9>&- 
-    for pid in $pids; do
-        [[ $pid = $$ ]] && continue
+  exec 9>>"$file" || {
+    echo "Exiting..."
+    exit 1
+  }
 
-        exec 9>&- 
-        return 1 # Locked by a pid.
-    done 
+  { pids=$(fuser -f "$file"); } 2>&- 9>&-
+  for pid in $pids; do
+    [[ $pid = $$ ]] && continue
+
+    exec 9>&-
+    return 1 # Locked by a pid.
+  done
 }
