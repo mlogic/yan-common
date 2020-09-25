@@ -49,21 +49,6 @@
        state=latest
   when: ansible_os_family == "RedHat"
 
-# Enable issue_discards for LVM. TODO: check if this is still necessary for newer distros.
-- name: check that the lvm.conf exists
-  stat:
-    path: /etc/lvm/lvm.conf
-  register: lvm_conf
-
-- name: enable LVM discard
-  lineinfile:
-    dest: /etc/lvm/lvm.conf
-    regexp: "issue_discards ="
-    line: "	issue_discards = 1"
-    insertafter: EOF
-    state: present
-  when: lvm_conf.stat.exists == True
-
 - name: enable trimfs timer
   command: systemctl enable fstrim.timer
 
@@ -75,11 +60,11 @@
   apt: upgrade=safe update_cache=yes
   when: ansible_os_family == "Debian"
 
-- name: install packages second batch
+- name: install packages second batch for Red Hat
   yum: name=bc,bzip2,mg,moreutils,yum-cron,yum-utils state=latest
   when: ansible_os_family == "RedHat"
 
-- name: install packages for Debian
+- name: install packages second batch for Debian
   apt: name=mg,moreutils,needrestart,net-tools state=latest
   when: ansible_os_family == "Debian"
 
@@ -100,7 +85,7 @@
 
 - name: passwordless ssh for root
   authorized_key: user=root key="{{ lookup('file', '~/.ssh/id_rsa.pub') }}"
-  when: inventory_hostname != "localhost" and sshd_conf.stat.exists == True
+  when: passwordless_ssh_for_root == True and inventory_hostname != "localhost" and sshd_conf.stat.exists == True
 
 - name: disable DNS in sshd
   lineinfile:
@@ -118,4 +103,4 @@
 
 - debug: msg='Manual TODO":" add noatime to all entries in your fstab'
 
-- debug: msg='To enable discard support in LUKS, add "discard" to /etc/crypttab'
+- debug: msg='To enable discard support in LUKS, add "discard" to /etc/crypttab and run "sudo update-initramfs -c -k all"'
