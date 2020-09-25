@@ -41,7 +41,7 @@ There is no warranty, but I do welcome comments/issues/pull requests.
 * vbox-remove-old-auto-snapshots.sh: A tool for keeping a certain
   number of VirtualBox snapshots and removing the older ones.
 * roles/bootstrap-linux: default tasks that need to be done on all my
-  newly installed Debian/Ubuntu/CentOS 7 systems.
+  newly installed Debian/Ubuntu systems.
 * roles/mail-relay-gmx: set up a host to send outgoing emails through
   a GMX relay account.
 * roles/mysql-container: Start a MySQL container and wait until it
@@ -61,12 +61,13 @@ Check out the README file of each tool for help information.
 Supported OS
 ============
 
-`Ubuntu 18.10 <https://www.ubuntu.com/>`_ and `CentOS 7
-<https://www.centos.org/>`_ are my work horse OS so most scripts here
-are tested on them. I also use `Debian <http://www.debian.org/>`_
-(usually the stable and testing branches) but not all scripts are
-tested on Debian. Patches for supporting other OS and any kinds of
-improvements are always welcome!
+I am currently using `Ubuntu <https://www.ubuntu.com/>`_ 20.10 and
+`Debian <http://www.debian.org/>`_, and have only tested these tools
+on them. I no longer have CentOS installation, so CentOS support will
+gradually be removed unless someone else want to step up. But patches
+for supporting other OS and any kinds of improvements are always
+welcome!
+
 
 TODO
 ====
