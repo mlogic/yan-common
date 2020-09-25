@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # VirtualBox: Remove old auto snapshots
 #
-# Copyright (c) 2015-2018, Yan Li <yanli@tuneup.ai>,
+# Copyright (c) 2015-2020, Yan Li <yanli@tuneup.ai>,
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
