@@ -26,7 +26,7 @@ There is no warranty, but I do welcome comments/issues/pull requests.
   unusable.
 * os/pull-docker-base-image.sh: Pull the base image referred to by a
   dockerfile.
-* os/run-until-success.sh: Run a command until success.
+* os/run_until_success.sh: Run a command until success.
 * os/start-virtualbox-vm.yaml: Ansible playbook for starting a
   VirtualBox VM and waiting until it starts accepting SSH connection.
 * os/stop-virtualbox-vm.yaml: Ansible playbook for stop a

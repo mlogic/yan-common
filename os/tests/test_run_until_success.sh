@@ -1,4 +1,5 @@
-# Logging functions
+#!/usr/bin/env bash
+# Test cases for run_until_success.sh
 #
 # Copyright (c) 2016-2020, Yan Li <yanli@tuneup.ai>,
 # All rights reserved.
@@ -24,33 +25,32 @@
 # CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+set -euo pipefail
+if [[ ${DEBUG:-0} -ne 0 ]]; then set -x; fi
+cd "$(dirname "$0")"
+YAN_COMM="$(pwd)/../.."
+readonly YAN_COMM
+. "${YAN_COMM}/shell/_log.sh"
+. "${YAN_COMM}/shell/_check.sh"
 
-log() {
-  local -r level=$1
-  shift
-  local -r log_level_var=LOG_${level^^}
-  local prefix
-  prefix="${LOG_PREFIX:-[$(date +'%Y-%m-%dT%H:%M:%S%z')] ${LOG_IDENTIFIER:-}, ${level}:}"
-  for dest in ${!log_level_var:-stdout}; do
-    case $dest in
-      stdout)
-        echo "$prefix $@"
-        ;;
-      stderr)
-        echo "$prefix $@" >&2
-        ;;
-      syslog)
-        echo "$@" | systemd-cat -p ${level}
-        ;;
-      *)
-        echo "Unknown log dest for level ${level}: ${dest}"
-        exit 1
-        ;;
-    esac
-  done
-}
+# Test a task is repeated after failed:
+# Don't generate the worker log file yet. Let the worker generate it
+# so we know if the worker has been called.
+declare -r TC_NAME="${0}:test_repeating_failed_task"
+WORKER_LOG_FILE="$(mktemp --dry-run)"
+readonly WORKER_LOG_FILE
 
-die() {
-  echo "$@" >&2
-  exit 1
-}
+# Use a random task name to prevent collision
+chronic ../run_until_success.sh --retry_gap 1minute --task_name test_task_${RANDOM} -- \
+        ./_test_run_until_success_worker.sh arg1 arg2 arg3 "$WORKER_LOG_FILE"
+val_from_worker=$(cat "${WORKER_LOG_FILE}")
+assert "FAILED: ${TC_NAME}: worker is not called for first run" [[ $val_from_worker -eq 0 ]]
+# Sleep a little longer than 1 minute to give at job some time to finish
+echo "Waiting for worker to finish. This needs about 65 seconds..."
+sleep 65
+val_from_worker=$(cat "${WORKER_LOG_FILE}")
+assert "FAILED: ${TC_NAME}: worker is not called for subsequent run" [[ $val_from_worker -gt 0 ]]
+
+echo "PASS: ${TC_NAME}"
+
+# TODO: test stop_rc

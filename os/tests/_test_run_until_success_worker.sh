@@ -1,4 +1,6 @@
-# Logging functions
+#!/usr/bin/env bash
+# Worker for test_run_until_success.sh. This worker run for four times
+# with rc=1, then exit with a 0 rc on the fifth run.
 #
 # Copyright (c) 2016-2020, Yan Li <yanli@tuneup.ai>,
 # All rights reserved.
@@ -24,33 +26,25 @@
 # CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+set -euo pipefail
+if [[ ${DEBUG:-0} -ne 0 ]]; then set -x; fi
 
-log() {
-  local -r level=$1
-  shift
-  local -r log_level_var=LOG_${level^^}
-  local prefix
-  prefix="${LOG_PREFIX:-[$(date +'%Y-%m-%dT%H:%M:%S%z')] ${LOG_IDENTIFIER:-}, ${level}:}"
-  for dest in ${!log_level_var:-stdout}; do
-    case $dest in
-      stdout)
-        echo "$prefix $@"
-        ;;
-      stderr)
-        echo "$prefix $@" >&2
-        ;;
-      syslog)
-        echo "$@" | systemd-cat -p ${level}
-        ;;
-      *)
-        echo "Unknown log dest for level ${level}: ${dest}"
-        exit 1
-        ;;
-    esac
-  done
-}
+. ../../shell/_check.sh
 
-die() {
-  echo "$@" >&2
+assert "arg1 wrong" [[ "$1" == "arg1" ]]
+assert "arg2 wrong" [[ "$2" == "arg2" ]]
+assert "arg3 wrong" [[ "$3" == "arg3" ]]
+
+WORKER_LOG_FILE=$4
+
+if ! [[ -f "${WORKER_LOG_FILE}" ]]; then
+  echo 0 >"${WORKER_LOG_FILE}"
   exit 1
-}
+else
+  old_val=$(cat "${WORKER_LOG_FILE}")
+  if (( old_val >= 4 )); then
+    exit
+  fi
+  echo $((old_val+1)) >"${WORKER_LOG_FILE}"
+  exit 1
+fi

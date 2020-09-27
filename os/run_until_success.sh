@@ -1,9 +1,8 @@
 #!/usr/bin/env bash
 # Usage:
-# run-until-success.sh [--force] [--stop_rc rc] --retry_gap gap --task_name name -- cmd
-#
-# TODO:
-# 1. test cases
+# run_until_success.sh [--force] [--stop_rc rc] --retry_gap gap --task_name name -- cmd
+# Warning: this tool cannot handle spaces in arguments correctly. Avoid using
+# spaces in your command. gap can be written as "30minute" without using space.
 #
 # Copyright (c) 2016-2020, Yan Li <yanli@tuneup.ai>,
 # All rights reserved.
@@ -30,6 +29,7 @@
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 set -euo pipefail
+if [[ ${DEBUG:-0} -ne 0 ]]; then set -x; fi
 
 YAN_COMM="$(dirname $0)/.."
 readonly YAN_COMM
@@ -69,7 +69,7 @@ while :; do
     shift
 done
 
-lock_dir=/var/tmp/run-until-success
+lock_dir=/var/tmp/run_until_success
 if ! [[ -d "${lock_dir}" ]]; then
     mkdir -p "${lock_dir}"
 fi
@@ -78,7 +78,7 @@ _mutex "${lock_dir}/${task_name}_mutex.pid" || {
     echo "Another instance is already running. Exiting..."
     exit 1
 }
-task_identifier_str="# run-until-success: ${task_name}"
+task_identifier_str="# run_until_success: ${task_name}"
 if [[ -f "${task_lock}" ]]; then
   job="$(cat "${task_lock}")"
   job_cmd_file="$(mktemp)"
@@ -104,10 +104,16 @@ set -e
 if [[ $rc -ne 0 ]] && [[ $rc -ne $stop_rc ]]; then
     echo "Command $@ failed. Queueing it up..."
     at_output_file="$(mktemp)"
+    set +e
     cat<<EOF | at NOW + "${retry_gap}" 2>"${at_output_file}"
 ${task_identifier_str}
-"$0" --force "${orig_cmd_opt[@]}"
+"$0" --force ${orig_cmd_opt[@]}
 EOF
+    if [[ $? -ne 0 ]]; then
+      echo "Failed to queue the next job:">&2
+      cat "${at_output_file}">&2
+      exit 3
+    fi
     job=$(grep "^job " "${at_output_file}" | cut -d' ' -f2)
     echo $job >"${task_lock}"
 fi

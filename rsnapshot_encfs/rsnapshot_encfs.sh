@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Do precheck and run backup jobs. This script is supposed to be run
-# by run-until-success.sh.
+# by run_until_success.sh.
 #
 # Copyright (c) 2016-2020, Yan Li <yanli@tuneup.ai>,
 # All rights reserved.

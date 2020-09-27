@@ -26,6 +26,11 @@
 # NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+# Get our own location.  "${BASH_SOURCE}" can be a symlink, so we
+# first get its real dir location, then find it's parent dir.
+_YAN_COMM="$(realpath "$(dirname "$(realpath "${BASH_SOURCE}")")/..")"
+. ${_YAN_COMM}/shell/_log.sh
+
 ################################################################################
 # Function name: _check
 #
@@ -49,4 +54,27 @@ _check()
     done
     echo "Timeout while checking $@"
     exit 254
+}
+
+################################################################################
+# Function name: assert
+#
+# Desc: assert the rc of test is 0, otherwise print error message and die
+#
+# Arguments: error_message test
+#
+# Sample:
+#   assert "arg1 wrong" [[ "${arg1}" == "exp" ]]
+#
+# TODO:
+#   support print error message using the "log" function
+assert() {
+  local error_message=$1
+  shift
+  if eval "$@"; then
+    return
+  else
+    echo "${error_message}"
+    exit 1
+  fi
 }
