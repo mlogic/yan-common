@@ -34,8 +34,8 @@ There is no warranty, but I do welcome comments/issues/pull requests.
 * remote-backup: Incremental, differential, de-duplicated backup tool
   using zpaq (http://mattmahoney.net/dc/zpaq.html). This tool creates
   snapshots and uploads them to a remote host.
-* rsnapshot_encfs: Mount an encfs location and run rsnapshot at
-  designated intervals. Retry automatically on flaky network.
+* borgmatic_wrapper: A wrapper script for running borgmatic with
+  anacron. Retry automatically on flaky network.
 * shell/_check.sh: A shell function for checking a condition with
   timeout.
 * vbox-remove-old-auto-snapshots.sh: A tool for keeping a certain

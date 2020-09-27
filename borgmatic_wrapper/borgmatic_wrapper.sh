@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Do precheck and run backup jobs. This script is supposed to be run
+# Do precheck and run borgmatic backup jobs. This script is supposed to be run
 # by run_until_success.sh.
 #
 # Copyright (c) 2016-2020, Yan Li <yanli@tuneup.ai>,
@@ -43,7 +43,7 @@ LOG_IDENTIFIER=${LOG_IDENTIFIER:-rsnapshot_encfs}
 if [[ $# -eq 0 ]]; then
     cat<< EOF
 Usage: $0 config_file <rsnapshot_job>
-Example: $0 ~/.config/rsnapshot_encfs_mydataset.config sync daily
+Example: $0 ~/.config/rsnapshot_encfs_mydataset.config
 EOF
     exit 9
 fi
@@ -77,72 +77,17 @@ if ! _mutex "/var/tmp/${LOG_IDENTIFIER}.lock"; then
   exit 1
 fi
 
-PLAINTEXT_MOUNT_POINT=`grep "^snapshot_root" "${RSNAPSHOT_CONF_FILE}" | awk '{print $2}'`
-# Remove the final /
-if [ "${PLAINTEXT_MOUNT_POINT: -1}" = "/" ]; then
-  PLAINTEXT_MOUNT_POINT=${PLAINTEXT_MOUNT_POINT::-1}
-fi
-if ! [ -d "$PLAINTEXT_MOUNT_POINT" ]; then
-  log error "Plaintext mount point $PLAINTEXT_MOUNT_POINT doesn't exist or cannot be accessed. Please create it first and check permission."
+# ionice class 3 is idle
+set +e
+nice -n 19 ionice -c 3 borgmatic -c "${BORGMATIC_CONF_FILE}"
+rc=$?
+set -e
+if [[ $rc -ne 0 ]]; then
+  log error "rsnapshot job ${job} failed with code $rc. Abort."
   exit 9
 fi
 
-# The following variable records if it is I (the script) who mounted
-# the point. We only unmount it on exit if we mounted it.
-I_MOUNTED_PLAINTEXT_MOUNT_POINT=0
-cleanup() {
-  if (( I_MOUNTED_PLAINTEXT_MOUNT_POINT )); then
-    umount "$PLAINTEXT_MOUNT_POINT"
-  fi
-}
-trap cleanup EXIT
-
-if ! stat "$ENCFS" &>/dev/null; then
-  log error "Cannot access encfs at ${ENCFS}."
-  exit 9
+# Write a finish file for the "sync" task.
+if [[ -n "${FINISH_TIMESTAMP_FILE:-}" ]]; then
+  date +"%F %H:%M:%S" > "${FINISH_TIMESTAMP_FILE}"
 fi
-
-if ! mount | grep -q " on $PLAINTEXT_MOUNT_POINT "; then
-  if ! echo "${ENCFS_PASSWORD}" | { encfs --stdinpass "$ENCFS" "$PLAINTEXT_MOUNT_POINT"; } 9>&-; then
-    log error "Failed to mount encfs. Abort."
-    exit 9
-  fi
-  I_MOUNTED_PLAINTEXT_MOUNT_POINT=1
-fi
-
-for job in $@; do
-  # We only check if the last "daily" run fails because it takes the
-  # longest time and has the highest chance for fail. "weekly" and
-  # "monthly" runs are just several "mv"s and should finish quickly.
-  if [[ "${job}" = "daily" ]]; then
-    running_file="${DAILY_FINISH_TIMESTAMP_FILE}.running"
-    if [[ -f "${running_file}" ]]; then
-      log info "Last run failed. Removing daily.1."
-      if [[ -d "${PLAINTEXT_MOUNT_POINT}/daily.1" ]]; then
-        rm -rf "${PLAINTEXT_MOUNT_POINT}/daily.1"
-      else
-        log info "Last run failed but couldn't find ${PLAINTEXT_MOUNT_POINT}/daily.1"
-      fi
-    fi
-    touch "${running_file}"
-  fi
-
-  # ionice class 3 is idle
-  set +e
-  nice -n 19 ionice -c 3 rsnapshot -c "${RSNAPSHOT_CONF_FILE}" "${job}"
-  rc=$?
-  set -e
-  if [[ $rc -ne 0 ]] && [[ $rc -ne 2 ]]; then
-    log error "rsnapshot job ${job} failed with code $rc. Abort."
-    exit 9
-  fi
-
-  # Write a finish file for the "sync" task.
-  if [[ "${job}" = "sync" ]]; then
-    date +"%F %H:%M:%S" > "${SYNC_FINISH_TIMESTAMP_FILE}"
-  elif [[ "${job}" = "daily" ]]; then
-    date +"%F %H:%M:%S" > "${DAILY_FINISH_TIMESTAMP_FILE}"
-    rm "${running_file}"
-  fi
-done # for job in "$@"
-
