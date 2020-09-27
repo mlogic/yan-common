@@ -3,5 +3,4 @@ PATH=/sbin:/bin:/usr/sbin:/usr/bin
 MAILTO=root
 
 # period(days) delay(minutes)
-1  0 borgmatic_myhost_daily chronic /home/yanli/yan-common/os/run_until_success.sh --retry_gap 30minute --stop_rc 9 --task_name borgmatic_myhost_daily -- /home/yanli/yan-common/borgmatic_wrapper/borgmatic_wrapper.sh ~/config/etc/borgmatic_myhost.config
-
+1  0 borgmatic_myhost_daily chronic /home/yanli/yan-common/os/run_until_success.sh --retry_gap 30minute --stop_rc 9 --task_name borgmatic_myhost_daily -- /home/yanli/yan-common/borgmatic_wrapper/borgmatic_wrapper.sh /home/yanli/config/etc/borgmatic_myhost.config
