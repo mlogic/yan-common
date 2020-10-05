@@ -55,20 +55,27 @@ echo "PASS: ${TC_NAME}"
 TC_NAME="${0}:test_generating_par2_files_in_hidden_par2_dir"
 tmp_par2_data_dir="$(mktemp -d)"
 rsync -a test_fileset_par2_data/ "${tmp_par2_data_dir}/"
-run_fileset_par2 "${tmp_par2_data_dir}" --use-hidden-dir
+run_fileset_par2 "${tmp_par2_data_dir}" --use_hidden_dir
 diff -Nur "${tmp_par2_data_dir}/.par2" "test_fileset_par2_expected"
 echo "PASS: ${TC_NAME}"
 
 TC_NAME="${0}:test_verifying_par2_files"
-run_fileset_par2 "${tmp_par2_data_dir}" --use-hidden-dir
+run_fileset_par2 "${tmp_par2_data_dir}" --use_hidden_dir
 diff -Nur "${tmp_par2_data_dir}/.par2" "test_fileset_par2_expected"
 echo "PASS: ${TC_NAME}"
 
 TC_NAME="${0}:check_pruning_par2_file_for_deleted_data_file"
 assert "par2 file for 2.txt doesn't exist" [[ -f "${tmp_par2_data_dir}/.par2/2.txt.par2" ]]
 rm "${tmp_par2_data_dir}/2.txt"
-run_fileset_par2 "${tmp_par2_data_dir}" --use-hidden-dir
+run_fileset_par2 "${tmp_par2_data_dir}" --use_hidden_dir
 assert "par2 file should NOT exist" ! [[ -f "${tmp_par2_data_dir}/.par2/2.txt.par2" ]]
+echo "PASS: ${TC_NAME}"
+
+TC_NAME="${0}:check_pruning_empty_par2_directory"
+mkdir "${tmp_par2_data_dir}/level2_dir"
+mv "${tmp_par2_data_dir}"/*txt "${tmp_par2_data_dir}/level2_dir"
+run_fileset_par2 "${tmp_par2_data_dir}" --use_hidden_dir
+assert "Emtpy par2 dir should NOT exist" ! [[ -d "${tmp_par2_data_dir}/.par2" ]]
 echo "PASS: ${TC_NAME}"
 
 # TODO: test stop_rc

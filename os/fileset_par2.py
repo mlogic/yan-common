@@ -26,6 +26,9 @@
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+# TODO:
+# 1. better documentation
+
 import argparse
 import logging
 import os
@@ -100,7 +103,7 @@ You can store par2 files in a .par2 directory along with the original data so
 they could be moved around together.""", formatter_class=argparse.RawTextHelpFormatter)
     parser.add_argument('-v', '--verbose', action='store_true')
     parser.add_argument('--dry_run', action='store_true')
-    parser.add_argument('--use-hidden-dir', action='store_true',
+    parser.add_argument('--use_hidden_dir', action='store_true',
                         help='store par2 files in a hidden .par2 directory next to file')
     parser.add_argument('--par2_dir', metavar='DIR', type=str,
                         help='the directory for storing par2 files')
@@ -122,7 +125,7 @@ they could be moved around together.""", formatter_class=argparse.RawTextHelpFor
             par2_file = os.path.realpath(os.path.join(os.path.realpath(args.par2_dir), file + '.par2'))
         else:
             data_file_path, data_file_name = os.path.split(data_file)
-            if data_file_name[-5:] == '.par2':
+            if data_file_name[-5:] == '.par2' and data_file_path[-6:] == '/.par2':
                 # This file is actually a par2 file. We check if the corresponding data
                 # file exists. If not, prune this par2 file.
                 par2_file = data_file
@@ -135,7 +138,12 @@ they could be moved around together.""", formatter_class=argparse.RawTextHelpFor
                     logging.info(f'File {data_file} exists')
                 else:
                     print(f'Cannot find the data file {data_file} for par2 file {par2_file}, remove the dangling par2 file')
-                    os.remove(par2_file)
+                    if not DRY_RUN:
+                        os.remove(par2_file)
+                        par2_file_dir = os.path.split(par2_file)[0]
+                        files = os.listdir(par2_file_dir)
+                        if len(files) == 0:
+                            os.rmdir(par2_file_dir)
                 continue
             par2_file = os.path.join(os.path.join(data_file_path, '.par2'), data_file_name) + '.par2'
         logging.info(f'Checking {data_file} with par2 file {par2_file}')
