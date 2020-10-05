@@ -46,8 +46,9 @@ Usage: $0 config_file [args_to_borgmatic]
 EOF
     exit 9
 fi
-# Source the config file
-. "$1"
+# Source the config file. For unknown reason, bash doesn't trigger the
+# ERR trap when sourcing a file failed.
+. "$1" || exit 9
 shift
 
 if (( CHECK_AC_POWER )) && ! on_ac_power; then
