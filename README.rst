@@ -16,6 +16,7 @@ There is no warranty, but I do welcome comments/issues/pull requests.
 * os/{daily-health-monitor.sh,enable-health-monitors.yaml}: Handy
   script for checking system health that should be run daily on
   servers and sending out emails.
+* os/fileset_par2.py: create par2 files recursively for a set of files.
 * os/git-compare-remote.sh: Check if a git-repo against its remote
   branch.
 * os/if-bytes-warn.sh: Check the bytes sent from all NICs and sent a
