@@ -69,12 +69,12 @@ while :; do
     shift
 done
 
-lock_dir=/var/tmp/run_until_success
+lock_dir=/var/tmp
 if ! [[ -d "${lock_dir}" ]]; then
     mkdir -p "${lock_dir}"
 fi
-task_lock="${lock_dir}/${task_name}.job"
-_mutex "${lock_dir}/${task_name}_mutex.pid" || {
+task_lock="${lock_dir}/run_until_success_${task_name}.job"
+_mutex "${lock_dir}/run_until_success_${task_name}_mutex.pid" || {
     echo "Another instance is already running. Exiting..."
     exit 1
 }
