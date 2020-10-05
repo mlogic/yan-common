@@ -42,8 +42,7 @@ LOG_IDENTIFIER=${LOG_IDENTIFIER:-rsnapshot_encfs}
 
 if [[ $# -eq 0 ]]; then
     cat<< EOF
-Usage: $0 config_file <rsnapshot_job>
-Example: $0 ~/.config/rsnapshot_encfs_mydataset.config
+Usage: $0 config_file [args_to_borgmatic]
 EOF
     exit 9
 fi
@@ -79,7 +78,7 @@ fi
 
 # ionice class 3 is idle
 set +e
-nice -n 19 ionice -c 3 borgmatic -c "${BORGMATIC_CONF_FILE}"
+nice -n 19 ionice -c 3 borgmatic -c "${BORGMATIC_CONF_FILE}" "$@"
 rc=$?
 set -e
 if [[ $rc -ne 0 ]]; then
