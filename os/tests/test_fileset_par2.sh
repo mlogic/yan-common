@@ -39,7 +39,9 @@ run_fileset_par2() {
   pushd "${data_dir}" >/dev/null
   if [[ ${DEBUG:-0} -ne 0 ]]; then EXTRA_ARGS=('-v'); else EXTRA_ARGS=(); fi
   find . -type f | "${YAN_COMM}/os/fileset_par2.py" "$@" "${EXTRA_ARGS[@]}"
+  rc=$?
   popd >/dev/null
+  return $rc
 }
 
 TC_NAME="${0}:test_generating_par2_files_in_separate_par2_dir"
@@ -61,6 +63,35 @@ echo "PASS: ${TC_NAME}"
 
 TC_NAME="${0}:test_verifying_par2_files"
 run_fileset_par2 "${tmp_par2_data_dir}" --use_hidden_dir
+diff -Nur "${tmp_par2_data_dir}/.par2" "test_fileset_par2_expected"
+echo "PASS: ${TC_NAME}"
+
+TC_NAME="${0}:test_corrupted_file"
+# Corrupt this file
+echo "corrupted_file" > "${tmp_par2_data_dir}/1.txt"
+# Then touch the par2 file so it's newer than the corrupted file, this should
+# cause fileset_par2 to think the file content is corrupted.
+sleep 1
+touch "${tmp_par2_data_dir}/.par2/1.txt.par2"
+set +e
+run_fileset_par2 "${tmp_par2_data_dir}" --use_hidden_dir
+assert "fileset_par2 failed to detect the corrupted file" [[ $? -ne 0 ]]
+set -e
+echo "PASS: ${TC_NAME}"
+
+TC_NAME="${0}:test_updating_file"
+# Now change the mtime of 1.txt and update the par2, to make sure 1.txt.par2
+# is changed.
+touch "${tmp_par2_data_dir}/1.txt"
+run_fileset_par2 "${tmp_par2_data_dir}" --use_hidden_dir
+set +e
+diff "${tmp_par2_data_dir}/.par2/1.txt.par2" test_fileset_par2_expected/1.txt.par2 >/dev/null
+assert "1.txt.par2 is not updated" [[ $? -ne 0 ]]
+set -e
+# Restore the old 1.txt and update par2 again
+cp test_fileset_par2_data/1.txt "${tmp_par2_data_dir}"
+run_fileset_par2 "${tmp_par2_data_dir}" --use_hidden_dir
+# Now 1.txt.par2 should be back to the expected value
 diff -Nur "${tmp_par2_data_dir}/.par2" "test_fileset_par2_expected"
 echo "PASS: ${TC_NAME}"
 

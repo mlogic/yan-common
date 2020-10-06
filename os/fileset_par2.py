@@ -43,7 +43,14 @@ def create_par2(file: str, par2_path: str):
     assert par2_path[-5:] == '.par2', 'par2_path must end with .par2 ext name'
     par2_path_no_ext = par2_path[0:-5]
     par2_parent_dir = os.path.split(os.path.realpath(par2_path))[0]
-    file_parent_dir = os.path.split(os.path.realpath(file))[0]
+    file_parent_dir, file_name = os.path.split(os.path.realpath(file))
+    if len(file_name) == 1:
+        print(f'Ignoring file {file} because par2 cannot process file that has name of length 1')
+        return
+    if os.path.getsize(file) == 0:
+        print(f'Ignoring file {file} because par2 cannot process file that has size 0')
+        return
+
     cmd = f'cd "{par2_parent_dir}" && chronic par2create "-B{file_parent_dir}" -r1 -n1 "{par2_path}" "{file}" && mv "{par2_path_no_ext}".vol*.par2 "{par2_path_no_ext}.par2"'
     if not DRY_RUN:
         if not os.path.exists(par2_parent_dir):
@@ -68,7 +75,11 @@ def verify_par2(file: str, par2_path: str) -> bool:
         return True
 
 
-def update_par2(file: str, par2_file: str):
+def update_par2(file: str, par2_file: str) -> bool:
+    """Update par2
+
+    :returns false if a corrupted file is detected
+    """
     file_mtime = os.path.getmtime(file)
     if os.path.exists(par2_file):
         logging.info(f'par2 file {par2_file} exists')
@@ -78,17 +89,22 @@ def update_par2(file: str, par2_file: str):
                 print(f'Verifying {par2_file}: ', end='')
             if verify_par2(file, par2_file):
                 print('OK')
+                return True
             else:
                 print('FAILED, FILE IS CORRUPTED')
-            return
+                return False
         else:
             if not DRY_RUN:
                 print(f'Updating {par2_file}')
+                # par2create doesn't overwrite existing par2 file, so we have
+                # to remove it first
+                os.remove(par2_file)
     else:
         logging.info(f'par2 file {par2_file} does not exists')
         if not DRY_RUN:
             print(f'Creating {par2_file}')
     create_par2(file, par2_file)
+    return True
 
 
 if __name__ == "__main__":
@@ -116,6 +132,7 @@ they could be moved around together.""", formatter_class=argparse.RawTextHelpFor
     BASE_DIR = os.getcwd()
     logging.debug(f'Base dir {BASE_DIR}')
 
+    corrupted_files = 0
     for file in map(str.rstrip, sys.stdin):
         if os.path.isabs(file) and args.par2_dir is not None:
             logging.error('Input file path must be relative path when par2_dir is set. Exiting')
@@ -137,7 +154,8 @@ they could be moved around together.""", formatter_class=argparse.RawTextHelpFor
                 if os.path.isfile(data_file):
                     logging.info(f'File {data_file} exists')
                 else:
-                    print(f'Cannot find the data file {data_file} for par2 file {par2_file}, remove the dangling par2 file')
+                    print(f'Cannot find the data file {data_file} for par2 file {par2_file}, '
+                          'remove the dangling par2 file')
                     if not DRY_RUN:
                         os.remove(par2_file)
                         par2_file_dir = os.path.split(par2_file)[0]
@@ -147,4 +165,6 @@ they could be moved around together.""", formatter_class=argparse.RawTextHelpFor
                 continue
             par2_file = os.path.join(os.path.join(data_file_path, '.par2'), data_file_name) + '.par2'
         logging.info(f'Checking {data_file} with par2 file {par2_file}')
-        update_par2(data_file, par2_file)
+        if not update_par2(data_file, par2_file):
+            corrupted_files += 1
+    sys.exit(corrupted_files)
