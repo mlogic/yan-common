@@ -1,0 +1,22 @@
+# Use this job to stress test a new HDD. Put in your device name to
+# filename below before running. This test is DESTRUCTIVE!
+# For more FIO sample jobs, see
+# https://docs.cloud.oracle.com/en-us/iaas/Content/Block/References/samplefiocommandslinux.htm
+
+[global]
+blocksize_range=64Ki:64Mi
+iodepth=16
+direct=1
+ioengine=libaio
+group_reporting
+time_based
+
+# Runtime in seconds. We usually do 12h to 24h for new HDD depending
+# on your time budget.
+runtime=57600
+numjobs=2
+name=raw-randreadwrite
+rw=randrw
+							
+[job1]
+filename=/dev/sdXXX
