@@ -41,7 +41,7 @@ logger = None
 
 def escape_for_bash(name: str) -> str:
     result = name
-    for special_char in ('"', '\\', '`', '$'):
+    for special_char in ('"', '\\', '`', '$', '*', '?'):
         result = result.replace(special_char, '\\' + special_char)
     return result
 
