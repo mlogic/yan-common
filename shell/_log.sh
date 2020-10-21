@@ -25,8 +25,33 @@
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+###############################################################################
+# Log to one or more destinations.
+# usage: log level message...
+# options:
+#     level: One of "emerg", "alert", "crit", "err", "warning",
+#            "notice", "info", "debug" (see systemd-cat(1)). The
+#            destination for a specific level is designated by
+#            environment variable LOG_{level}. For instance, LOG_INFO
+#            specifies the destination for level info.
+#
+# The LOG_{level} variable specifies the destination of a level and is a
+# space separated list of destinations. Destination can be "stdout",
+# "stderr", or "syslog.
+#
+# For instance, when we have
+# LOG_INFO="syslog"
+# LOG_WARNING="syslog stdout"
+# then we could do
+# log info "this goes to syslog only"
+# log warning "this goes to both syslog and stdout"
+#
+# Other variables:
+# LOG_IDENTIFIER can be used to specify the name of the program instance.
+# LOG_PREFIX specifies the prefix for each log line (except syslog destination).
 log() {
-  local -r level=$1
+  # Convert level to lowercase
+  local -r level=${1,,}
   shift
   local -r log_level_var=LOG_${level^^}
   local prefix
@@ -40,7 +65,7 @@ log() {
         echo "$prefix $@" >&2
         ;;
       syslog)
-        echo "$@" | systemd-cat -p ${level}
+        echo "$@" | systemd-cat --identifier="${LOG_IDENTIFIER:-}" -p ${level}
         ;;
       *)
         echo "Unknown log dest for level ${level}: ${dest}"

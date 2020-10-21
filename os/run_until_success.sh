@@ -39,7 +39,8 @@ readonly YAN_COMM
 readonly orig_cmd_opt=("$@")
 force=0
 stop_rc=0
-
+LOG_INFO=syslog
+LOG_ERR="syslog stderr"
 while :; do
     case $1 in
         --force)
@@ -57,17 +58,22 @@ while :; do
             shift
             task_name=$1
             ;;
+        --verbose)
+            shift
+            LOG_INFO="syslog stderr"
+            ;;
         --)
             shift
             break
             ;;
         *)
-            log error "Unknown option: $1"
+            log err "Unknown option: $1"
             exit 2
             ;;
     esac
     shift
 done
+LOG_IDENTIFIER="run_until_success_task_${task_name}"
 
 lock_dir=/var/tmp
 if ! [[ -d "${lock_dir}" ]]; then
@@ -102,7 +108,7 @@ rc=$?
 set -e
 
 if [[ $rc -ne 0 ]] && [[ $rc -ne $stop_rc ]]; then
-    echo "Command $@ failed. Queueing it up..."
+    log info "Command $@ failed. Queueing it up..."
     at_output_file="$(mktemp)"
     set +e
     cat<<EOF | at NOW + "${retry_gap}" 2>"${at_output_file}"
@@ -110,7 +116,7 @@ ${task_identifier_str}
 "$0" --force ${orig_cmd_opt[@]}
 EOF
     if [[ $? -ne 0 ]]; then
-      echo "Failed to queue the next job:">&2
+      log err "Failed to queue the next job:"
       cat "${at_output_file}">&2
       exit 3
     fi
