@@ -56,6 +56,7 @@ echo "PASS: ${TC_NAME}"
 
 TC_NAME="${0}:test_generating_par2_files_in_hidden_par2_dir"
 tmp_par2_data_dir="$(mktemp -d)"
+tmp_out="$(mktemp)"
 rsync -a test_fileset_par2_data/ "${tmp_par2_data_dir}/"
 run_fileset_par2 "${tmp_par2_data_dir}" --use_hidden_dir
 diff -Nur "${tmp_par2_data_dir}/.par2" "test_fileset_par2_expected"
@@ -83,6 +84,16 @@ TC_NAME="${0}:test_updating_file"
 # Now change the mtime of 1.txt and update the par2, to make sure 1.txt.par2
 # is changed.
 touch "${tmp_par2_data_dir}/1.txt"
+# First run with no-update mode
+set +e
+run_fileset_par2 "${tmp_par2_data_dir}" --use_hidden_dir --no_update &>"${tmp_out}"
+assert "no-update mode: failed to detect changed file" [[ $? -eq 1 ]]
+assert_in_file "no-update mode: failed to detect message 'CHANGED FILE'" "NO-UPDATE MODE, SKIPPED" "${tmp_out}"
+set -e
+# There should be no change to par2 files
+diff -Nur "${tmp_par2_data_dir}/.par2" test_fileset_par2_expected
+
+# Now run it again to actually update the par2 files
 run_fileset_par2 "${tmp_par2_data_dir}" --use_hidden_dir
 set +e
 diff "${tmp_par2_data_dir}/.par2/1.txt.par2" test_fileset_par2_expected/1.txt.par2 >/dev/null

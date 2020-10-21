@@ -78,3 +78,25 @@ assert() {
     exit 1
   fi
 }
+
+################################################################################
+# Function name: assert_in_file
+#
+# Desc: assert str exists in file
+#
+# Arguments: error_message str file
+#
+# Sample:
+#   assert_in_file "Update failure" updated /tmp/prog.out
+#
+# TODO:
+#   support print error message using the "log" function
+assert_in_file() {
+  local error_message=$1
+  local exp_str=$2
+  local file_name=$3
+  if ! grep -q "${exp_str}" "${file_name}"; then
+    echo "${error_message}"
+    exit 1
+  fi
+}
