@@ -55,6 +55,9 @@ def create_par2(file: str, par2_path: str):
     if len(file_name) == 1:
         logger.info(f'Ignoring file {file} because par2 cannot process file that has name of length 1')
         return
+    if '*' in file_name or '?' in file_name:
+        logger.info(f'Ignoring file {file} because par2 cannot process file that has wildcards in name')
+        return
     if os.path.getsize(file) == 0:
         logger.info(f'Ignoring file {file} because par2 cannot process file that has size 0')
         return
@@ -78,7 +81,7 @@ def create_par2(file: str, par2_path: str):
 def verify_par2(file: str, par2_path: str) -> bool:
     par2_parent_dir = os.path.split(os.path.realpath(par2_path))[0]
     file_parent_dir = os.path.split(os.path.realpath(file))[0]
-    cmd = f'cd "{par2_parent_dir}" && chronic par2verify "-B{file_parent_dir}" "{par2_path}" "{file}"'
+    cmd = f'cd "{escape_for_bash(par2_parent_dir)}" && chronic par2verify "-B{escape_for_bash(file_parent_dir)}" "{escape_for_bash(par2_path)}" "{escape_for_bash(file)}"'
     if DRY_RUN:
         print(f'dry run: {cmd}')
         return True
