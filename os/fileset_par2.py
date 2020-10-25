@@ -82,7 +82,9 @@ def create_par2(file: str, par2_path: str):
 def verify_par2(file: str, par2_path: str) -> bool:
     par2_parent_dir = os.path.split(os.path.realpath(par2_path))[0]
     file_parent_dir = os.path.split(os.path.realpath(file))[0]
-    cmd = f'cd "{escape_for_bash(par2_parent_dir)}" && chronic par2verify "-B{escape_for_bash(file_parent_dir)}" "{escape_for_bash(par2_path)}" "{escape_for_bash(file)}"'
+    cmd = f'cd "{escape_for_bash(par2_parent_dir)}" && '\
+          f'chronic par2verify "-B{escape_for_bash(file_parent_dir)}" "{escape_for_bash(par2_path)}" '\
+          f'"{escape_for_bash(file)}"'
     if DRY_RUN:
         print(f'dry run: {cmd}')
         return True
@@ -190,6 +192,9 @@ they could be moved around together.""", formatter_class=argparse.RawTextHelpFor
         if os.path.isabs(file) and args.par2_dir is not None:
             logger.error('Input file path must be relative path when par2_dir is set. Exiting')
             exit(1)
+        if os.path.isdir(file):
+            logger.debug(f'Ignoring directory {file}')
+            continue
         data_file = os.path.realpath(os.path.join(BASE_DIR, file))
         if args.par2_dir is not None:
             par2_file = os.path.realpath(os.path.join(os.path.realpath(args.par2_dir), file + '.par2'))
@@ -218,7 +223,7 @@ they could be moved around together.""", formatter_class=argparse.RawTextHelpFor
                                   'will remove the dangling par2 file')
                         else:
                             logger.info(f'Cannot find the data file {data_file} for par2 file {par2_file}, '
-                                         'removing the dangling par2 file')
+                                        'removing the dangling par2 file')
                             os.remove(par2_file)
                             par2_file_dir = os.path.split(par2_file)[0]
                             files = os.listdir(par2_file_dir)

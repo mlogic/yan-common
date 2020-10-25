@@ -38,7 +38,7 @@ run_fileset_par2() {
   shift 1
   pushd "${data_dir}" >/dev/null
   if [[ ${DEBUG:-0} -ne 0 ]]; then EXTRA_ARGS=('-v'); else EXTRA_ARGS=(); fi
-  find . -type f | "${YAN_COMM}/os/fileset_par2.py" "$@" "${EXTRA_ARGS[@]}"
+  find . | "${YAN_COMM}/os/fileset_par2.py" "$@" "${EXTRA_ARGS[@]}"
   rc=$?
   popd >/dev/null
   return $rc
