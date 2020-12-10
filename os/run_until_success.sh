@@ -36,11 +36,24 @@ readonly YAN_COMM
 . "${YAN_COMM}/shell/_log.sh"
 . "${YAN_COMM}/shell/_mutex.sh"
 
+if [[ $# -eq 0 ]]; then
+  cat<<EOF
+Usage: $0 [options]
+Options:
+  --force    Create a new at job even when another one of the same command
+             exists. Default: not create in this case.
+EOF
+fi
+
+script_file="$(realpath $0)"
+readonly script_file
 readonly orig_cmd_opt=("$@")
 force=0
 stop_rc=0
 LOG_INFO=syslog
 LOG_ERR="syslog stderr"
+
+# Parse the options
 while :; do
     case $1 in
         --force)
@@ -108,18 +121,32 @@ rc=$?
 set -e
 
 if [[ $rc -ne 0 ]] && [[ $rc -ne $stop_rc ]]; then
-    log info "Command $@ failed. Queueing it up..."
-    at_output_file="$(mktemp)"
-    set +e
-    cat<<EOF | at NOW + "${retry_gap}" 2>"${at_output_file}"
-${task_identifier_str}
-"$0" --force ${orig_cmd_opt[@]}
-EOF
-    if [[ $? -ne 0 ]]; then
-      log err "Failed to queue the next job:"
-      cat "${at_output_file}">&2
-      exit 3
+  log info "Command $@ failed. Queueing it up..."
+
+  # Make sure orig_cmd_opt doesn't have `--force` since we will always
+  # add it and having more than one `--force` is just ugly.
+  new_cmd_opt=()
+  for opt in "${orig_cmd_opt[@]}"; do
+    if [[ "$opt" != "--force" ]]; then
+      new_cmd_opt+=("$opt")
     fi
-    job=$(grep "^job " "${at_output_file}" | cut -d' ' -f2)
-    echo $job >"${task_lock}"
+  done
+
+  at_output_file="$(mktemp)"
+  # We use `--force` to force create our next job when this process is
+  # still running.
+  set +e
+  # Don't double quote `${new_cmd_opt[@]}`, because that would make
+  # them a single argument in here document.
+  cat<<EOF | at NOW + "${retry_gap}" 2>"${at_output_file}"
+${task_identifier_str}
+"${script_file}" --force ${new_cmd_opt[@]}
+EOF
+  if [[ $? -ne 0 ]]; then
+    log err "Failed to queue the next job:"
+    cat "${at_output_file}">&2
+    exit 3
+  fi
+  job=$(grep "^job " "${at_output_file}" | cut -d' ' -f2)
+  echo $job >"${task_lock}"
 fi
