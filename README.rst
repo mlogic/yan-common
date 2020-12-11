@@ -80,8 +80,11 @@ Naming Convention
 =================
 
 I try to follow Google's style as closely as possible:
+
 * `Google Shell Style Guide
   <https://google.github.io/styleguide/shellguide.html>`_
+* `Google Python Style Guide
+  <https://google.github.io/styleguide/pyguide.html>`_
 
 Scripts that begin with `_` are support scripts that generally
 shouldn't be called by users directly.
