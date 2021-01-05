@@ -9,7 +9,7 @@ ZPAQ=/home/yanli/zpaq/zpaq
 # ZPAQ options. It should begin with files and directories you want to
 # backup and followed by options. If you are backing up important
 # system files you may need to run remote-backup as root.
-ZPAQOPT=(/home /etc -key ENCRYPTION_KEY_HERE -m4 -not $STAGING -not /home/yanli/no.backup -not /home/yanli/.local/share/Trash -not /home/yanli/.cache)
+ZPAQOPT=(/home /etc -key ENCRYPTION_KEY_HERE -m4 -not $STAGING -not /home/yanli/no.backup -not /home/yanli/.local/share/Trash -not /home/yanli/.cache -not '*/__pycache__' -not '*/CacheStorage')
 # Remote host and login information. Make sure the user under which
 # you are running remote-backup can ssh to this host without having to
 # answer questions like whether to trust the host.
