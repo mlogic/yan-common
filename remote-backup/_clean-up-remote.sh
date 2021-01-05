@@ -52,7 +52,7 @@ if [ $REMOTE_FULL_SNAPSHOTS_TO_KEEP ]; then
 		;;
 	    rclone)
 		for file in ${SS_TO_DEL}; do
-		    rclone delete "${REMOTE}:${REMOTE_DIR}/${file}"
+		    rclone delete "${REMOTE}:${REMOTE_DIR}" --include="${file}"
 		done
 		;;
 	    *)
