@@ -77,9 +77,14 @@ if ! _mutex "/var/tmp/${LOG_IDENTIFIER}.lock"; then
   exit 1
 fi
 
-# ionice class 3 is idle
+BORGMATIC_ARGS=(-c "${BORGMATIC_CONF_FILE}")
+if [[ -n "${EXTRA_BORGMATIC_ARGS:-}" ]]; then
+  BORGMATIC_ARGS=("${BORGMATIC_ARGS[@]}" "${EXTRA_BORGMATIC_ARGS[@]}")
+fi
+
 set +e
-nice -n 19 ionice -c 3 borgmatic -c "${BORGMATIC_CONF_FILE}" "$@"
+# ionice class 3 is idle
+nice -n 19 ionice -c 3 borgmatic "${BORGMATIC_ARGS[@]}" "$@"
 rc=$?
 set -e
 if [[ $rc -ne 0 ]]; then
