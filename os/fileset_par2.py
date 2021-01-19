@@ -144,7 +144,7 @@ if __name__ == "__main__":
 stdin and should have a file name on each time.
 
 Examples: list all files and filter out certain directories:
-find -name ".snapshots" -prune -o -name "*.par2" -prune -o -type f | ~/yan-common/os/fileset_par2.py --systemd_log --use_hidden_dir
+find -name ".snapshots" -prune -o ! -name "*.par2" -type f | ~/yan-common/os/fileset_par2.py --systemd_log --use_hidden_dir
 
 You can store par2 files in a .par2 directory along with the original data so
 they could be moved around together.""", formatter_class=argparse.RawTextHelpFormatter)
