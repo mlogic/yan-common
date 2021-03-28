@@ -63,6 +63,8 @@ def create_par2(file: str, par2_path: str):
         logger.info(f'Ignoring file {file} because par2 cannot process file that has size 0')
         return
 
+    # TODO: check file size and adjust the parity percent to make sure
+    # the file would survive a one-sector (4096 bytes) damage.
     cmd = f'cd "{escape_for_bash(par2_parent_dir)}" && '\
           f'chronic par2create "-B{escape_for_bash(file_parent_dir)}" -r1 -n1 "{escape_for_bash(par2_path)}" '\
           f'"{escape_for_bash(file)}" && mv "{escape_for_bash(par2_path_no_ext)}".vol*.par2 '\
