@@ -74,6 +74,13 @@ if [ -n "$force_color_prompt" ]; then
   fi
 fi
 
+__sync_command_history() {
+  # Save all unsaved history so it can be picked up by other shell sessions
+  history -a
+  # Read history that might have been modified by other shell sessions
+  history -r
+}
+
 __prompt_command() {
   local EXIT="$?"             # This needs to be first to grab the RC from last command
   PS1='${debian_chroot:+($debian_chroot)}\[\033[01;32m\]\u@\h\[\033[00m\]:\[\033[01;34m\]\w\[\033[00m\]'
@@ -90,12 +97,14 @@ __prompt_command() {
   fi
 
   PS1+="\$ "
+  __sync_command_history
 }
 
 if [ "$color_prompt" = yes ]; then
   PROMPT_COMMAND=__prompt_command # Func to gen PS1 after CMDs
 else
   PS1='${debian_chroot:+($debian_chroot)}\u@\h:\w\$ '
+  PROMPT_COMMAND=__sync_command_history
 fi
 unset color_prompt force_color_prompt
 
