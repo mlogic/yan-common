@@ -13,3 +13,5 @@
 */30 *        * * *           chronic anacron -d -s -t /home/yanli/config/etc/backup-anacrontab -S /home/yanli/.anacron/spool
 ```
 
+4, You could pass other parameters to `borgmatic_wrapper.sh` directly
+   on the command line, such as `-v 1 --progress`.
