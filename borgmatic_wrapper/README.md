@@ -14,4 +14,5 @@
 ```
 
 4, You could pass other parameters to `borgmatic_wrapper.sh` directly
-   on the command line, such as `-v 1 --progress`.
+   on the command line. For instance, pass `-v 1 --progress` to show
+   the progress. Pass "check --repair" to do check and repair.
