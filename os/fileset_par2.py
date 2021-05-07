@@ -30,8 +30,10 @@
 # 1. better documentation
 
 import argparse
+import grp
 import logging
 import os
+import pwd
 import sys
 
 DRY_RUN = False
@@ -48,6 +50,16 @@ def escape_for_bash(name: str) -> str:
 
 
 def create_par2(file: str, par2_path: str):
+    '''Create par2 file for file at par2_path.
+
+    Args:
+        file: Path of the source data file.
+        par2_path: Path of the destination par2 file.
+
+    All parent directories will be created automatically. If being run
+    as root, the par2 files (and required directories) will be created
+    as owned by the same owner and group of their parent.
+    '''
     par2_path = os.path.realpath(par2_path)
     assert par2_path[-5:] == '.par2', 'par2_path must end with .par2 ext name'
     par2_path_no_ext = par2_path[0:-5]
@@ -70,9 +82,42 @@ def create_par2(file: str, par2_path: str):
           f'"{escape_for_bash(file)}" && mv "{escape_for_bash(par2_path_no_ext)}".vol*.par2 '\
           f'"{escape_for_bash(par2_path_no_ext)}.par2"'
     if not DRY_RUN:
+        if os.geteuid() == 0:
+            # Find the uid and gid of the first parent that exists
+            higher_parent_dir = par2_parent_dir
+            while True:
+                if os.path.exists(higher_parent_dir):
+                    stat = os.stat(higher_parent_dir)
+                    uid = stat.st_uid
+                    gid = stat.st_gid
+                    username = pwd.getpwuid(uid).pw_name
+                    groupname = grp.getgrgid(gid).gr_name
+                    break
+                higher_parent_dir = os.path.split(higher_parent_dir)[0]
+
         if not os.path.exists(par2_parent_dir):
-            os.makedirs(par2_parent_dir)
+            if os.geteuid() == 0:
+                # We don't want to create files as root. Change the
+                # owner of the directory to the owner of parent
+                # directory. We use sudo + mkdir -p instead of
+                # os.makedirs() so that all missing directories could
+                # be created with the desired uid and gid
+                # automatically.
+                mkdir_cmd = f'sudo -u {username} -g {groupname} '
+                logger.debug(f'Creating par2 file parent directory(s) with user {username} and group {groupname}')
+            else:
+                mkdir_cmd = ''
+                logger.debug('Creating par2 file parent directory(s)')
+            mkdir_cmd += f'mkdir -p "{par2_parent_dir}"'
+            rc = os.system(mkdir_cmd)
+            if rc != 0:
+                error_msg = f'Failed command with rc {rc}: {mkdir_cmd}'
+                logger.error(error_msg)
+                raise IOError(error_msg)
+
         logger.debug(f'Creating par2 file: {cmd}')
+        if os.geteuid() == 0:
+            cmd += f' && chown {username}:{groupname} "{escape_for_bash(par2_path_no_ext)}.par2"'
         if os.system(cmd) != 0:
             logger.error(f'Failed to create par2 file for {file} in {par2_path}')
     else:
