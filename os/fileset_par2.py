@@ -204,7 +204,7 @@ they could be moved around together.""", formatter_class=argparse.RawTextHelpFor
                         help='also log every event to systemd')
     parser.add_argument('-c', metavar='RECOVERY_BLOCK_COUNT', type=int,
                         help='the recovery block count; if not set, -r1 will be passed to par2create, which creates a '
-                             'recovery file the size of which equals 1% of the size of original file; it is '
+                             'recovery file the size of which equals 1%% of the size of original file; it is '
                              'recommended to use -c and -s together to find tune the amount of recovery blocks and '
                              'size you want to create')
     parser.add_argument('-s', metavar='BLOCK_SIZE', type=int,
