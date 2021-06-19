@@ -78,8 +78,8 @@ def create_par2(file: str, par2_path: str, par2_recovery_file_arg: str):
 
     # TODO: check file size and adjust the parity percent to make sure
     # the file would survive a one-sector (4096 bytes) damage.
-    cmd = (f'cd "{escape_for_bash(par2_parent_dir)}" && '
-           f'chronic par2create "-B{escape_for_bash(file_parent_dir)}" {par2_recovery_file_arg} -n1 '
+    cmd = (f'set -eu; cd "{escape_for_bash(par2_parent_dir)}" && '
+           f'chronic nice -n 19 par2create "-B{escape_for_bash(file_parent_dir)}" {par2_recovery_file_arg} -n1 '
            f'"{escape_for_bash(par2_path)}" "{escape_for_bash(file)}" && '
            f'mv "{escape_for_bash(par2_path_no_ext)}".vol*.par2 "{escape_for_bash(par2_path_no_ext)}.par2"')
     if not DRY_RUN:
@@ -131,7 +131,7 @@ def verify_par2(file: str, par2_path: str) -> bool:
     par2_parent_dir = os.path.split(os.path.realpath(par2_path))[0]
     file_parent_dir = os.path.split(os.path.realpath(file))[0]
     cmd = f'cd "{escape_for_bash(par2_parent_dir)}" && '\
-          f'chronic par2verify "-B{escape_for_bash(file_parent_dir)}" "{escape_for_bash(par2_path)}" '\
+          f'chronic nice -n 19 par2verify "-B{escape_for_bash(file_parent_dir)}" "{escape_for_bash(par2_path)}" '\
           f'"{escape_for_bash(file)}"'
     if DRY_RUN:
         print(f'dry run: {cmd}')
