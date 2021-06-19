@@ -239,7 +239,6 @@ they could be moved around together.""", formatter_class=argparse.RawTextHelpFor
     # everything.
     logger.setLevel(logging.DEBUG)
 
-    print(args)
     if args.c:
         par2_recovery_file_arg = f'-c{args.c}'
     else:
