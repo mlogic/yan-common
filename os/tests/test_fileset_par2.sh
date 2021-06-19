@@ -50,6 +50,12 @@ run_fileset_par2 test_fileset_par2_data --par2_dir "${tmp_par2_dir}"
 diff -Nur "${tmp_par2_dir}" "test_fileset_par2_expected"
 echo "PASS: ${TC_NAME}"
 
+TC_NAME="${0}:test_generating_par2_files_with_custom_block_size_and_recovery_block_count"
+tmp_par2_dir="$(mktemp -d)"
+run_fileset_par2 test_fileset_par2_data --par2_dir "${tmp_par2_dir}" -c3 -s1048576
+assert "Generated par2 files are not of 3 MiB" [[ $(stat --format=%s "${tmp_par2_dir}/2.txt.par2") -eq 3146676 ]]
+echo "PASS: ${TC_NAME}"
+
 TC_NAME="${0}:test_verifying_par2_files"
 run_fileset_par2 test_fileset_par2_data --par2_dir "${tmp_par2_dir}"
 echo "PASS: ${TC_NAME}"

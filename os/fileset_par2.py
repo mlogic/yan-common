@@ -49,12 +49,13 @@ def escape_for_bash(name: str) -> str:
     return result
 
 
-def create_par2(file: str, par2_path: str):
+def create_par2(file: str, par2_path: str, par2_recovery_file_arg: str):
     '''Create par2 file for file at par2_path.
 
     Args:
         file: Path of the source data file.
         par2_path: Path of the destination par2 file.
+        par2_recovery_file_arg: The args that will be passed to par2create.
 
     All parent directories will be created automatically. If being run
     as root, the par2 files (and required directories) will be created
@@ -77,10 +78,10 @@ def create_par2(file: str, par2_path: str):
 
     # TODO: check file size and adjust the parity percent to make sure
     # the file would survive a one-sector (4096 bytes) damage.
-    cmd = f'cd "{escape_for_bash(par2_parent_dir)}" && '\
-          f'chronic par2create "-B{escape_for_bash(file_parent_dir)}" -r1 -n1 "{escape_for_bash(par2_path)}" '\
-          f'"{escape_for_bash(file)}" && mv "{escape_for_bash(par2_path_no_ext)}".vol*.par2 '\
-          f'"{escape_for_bash(par2_path_no_ext)}.par2"'
+    cmd = (f'cd "{escape_for_bash(par2_parent_dir)}" && '
+           f'chronic par2create "-B{escape_for_bash(file_parent_dir)}" {par2_recovery_file_arg} -n1 '
+           f'"{escape_for_bash(par2_path)}" "{escape_for_bash(file)}" && '
+           f'mv "{escape_for_bash(par2_path_no_ext)}".vol*.par2 "{escape_for_bash(par2_path_no_ext)}.par2"')
     if not DRY_RUN:
         if os.geteuid() == 0:
             # Find the uid and gid of the first parent that exists
@@ -147,8 +148,11 @@ def verify_par2(file: str, par2_path: str) -> bool:
             return False
 
 
-def update_par2(file: str, par2_file: str, no_update: bool) -> bool:
+def update_par2(file: str, par2_file: str, no_update: bool, par2_recovery_file_arg: str) -> bool:
     """Update par2
+
+    Args:
+        par2_recovery_file_arg: The args that will be passed to par2create.
 
     :returns false if a corrupted file is detected
     """
@@ -181,7 +185,7 @@ def update_par2(file: str, par2_file: str, no_update: bool) -> bool:
                 logger.error(f'NO-UPDATE MODE: {file} has a 0-size par2 file at {par2_file}')
                 return False
             logger.info(f'par2 file {par2_file} has size 0, recreating it')
-    create_par2(file, par2_file)
+    create_par2(file, par2_file, par2_recovery_file_arg)
     return True
 
 
@@ -198,6 +202,13 @@ they could be moved around together.""", formatter_class=argparse.RawTextHelpFor
     parser.add_argument('-v', '--verbose', action='store_true')
     parser.add_argument('--systemd_log', action='store_true',
                         help='also log every event to systemd')
+    parser.add_argument('-c', metavar='RECOVERY_BLOCK_COUNT', type=int,
+                        help='the recovery block count; if not set, -r1 will be passed to par2create, which creates a '
+                             'recovery file the size of which equals 1% of the size of original file; it is '
+                             'recommended to use -c and -s together to find tune the amount of recovery blocks and '
+                             'size you want to create')
+    parser.add_argument('-s', metavar='BLOCK_SIZE', type=int,
+                        help='the block size')
     parser.add_argument('--dry_run', action='store_true')
     parser.add_argument('--use_hidden_dir', action='store_true',
                         help='store par2 files in a hidden .par2 directory next to file')
@@ -227,6 +238,14 @@ they could be moved around together.""", formatter_class=argparse.RawTextHelpFor
     # filtering to each handler. We usually want journald_handler to log
     # everything.
     logger.setLevel(logging.DEBUG)
+
+    print(args)
+    if args.c:
+        par2_recovery_file_arg = f'-c{args.c}'
+    else:
+        par2_recovery_file_arg = '-r1'
+    if args.s:
+        par2_recovery_file_arg += f' -s{args.s}'
 
     logger.debug(f'Using par2_dir {args.par2_dir}')
     if args.dry_run:
@@ -280,6 +299,6 @@ they could be moved around together.""", formatter_class=argparse.RawTextHelpFor
                 continue
             par2_file = os.path.join(os.path.join(data_file_path, '.par2'), data_file_name) + '.par2'
         logger.info(f'Checking {data_file} with par2 file {par2_file}')
-        if not update_par2(data_file, par2_file, args.no_update):
+        if not update_par2(data_file, par2_file, args.no_update, par2_recovery_file_arg):
             corrupted_files += 1
     sys.exit(corrupted_files)
