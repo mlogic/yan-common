@@ -39,6 +39,12 @@ There is no warranty, but I do welcome comments/issues/pull requests.
   anacron. Retry automatically on flaky network.
 * shell/_check.sh: A shell function for checking a condition with
   timeout.
+* shell/_step.sh: Functions for managing steps. You can use these
+  functions to:
+  * Split a script into meaningful steps.
+  * Let user choose a start up step instead of always having to start
+    from the beginning.
+  * Resume from the interrupted step of a previous run.
 * vbox-remove-old-auto-snapshots.sh: A tool for keeping a certain
   number of VirtualBox snapshots and removing the older ones.
 * roles/bootstrap-linux: default tasks that need to be done on all my
