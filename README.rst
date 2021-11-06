@@ -8,6 +8,8 @@ There is no warranty, but I do welcome comments/issues/pull requests.
   as a recycle bin so you can recover your files until you reboot.
 * distill-pdf.sh: Distill a PDF and generat a (somehow) PDF/A
   compliant PDF file using GhostScript.
+* media/change_framerate_no_reencode.sh: Change the framerate of a
+  video file without reencoding it.
 * media/to-webp-lossless.sh: Convert images to best-compression
   lossless webp and preserve metadata. Useful for reduce the space for
   archiving large images that need lossless compression.
