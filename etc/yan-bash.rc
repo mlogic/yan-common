@@ -176,3 +176,5 @@ export XZ_OPT=-9
 [ -f ~/config/etc/bashrc ] && . ~/config/etc/bashrc
 
 [ -f /usr/share/virtualenvwrapper/virtualenvwrapper.sh ] && . /usr/share/virtualenvwrapper/virtualenvwrapper.sh
+
+export EDITOR=e
