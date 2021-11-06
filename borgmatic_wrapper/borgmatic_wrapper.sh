@@ -37,12 +37,18 @@ trap stop_run_until_success ERR
 
 YAN_COMM="$(dirname $0)/.."
 readonly YAN_COMM
-LOG_IDENTIFIER=${LOG_IDENTIFIER:-rsnapshot_encfs}
+LOG_IDENTIFIER=${LOG_IDENTIFIER:-borgmatic_wrapper}
 . "${YAN_COMM}/shell/_log.sh"
 
 if [[ $# -eq 0 ]]; then
     cat<< EOF
-Usage: $0 config_file [args_to_borgmatic]
+Usage: $0 config_file [--finish_timestamp_file file] [args_to_borgmatic]
+
+options:
+
+--finish_timestamp_file Create or update file when
+    finishes. Overwrites the same option in the config file.
+
 EOF
     exit 9
 fi
@@ -50,10 +56,14 @@ fi
 # ERR trap when sourcing a file failed.
 . "$1" || exit 9
 shift
+if [[ "${1:-}" = "--finish_timestamp_file" ]]; then
+  FINISH_TIMESTAMP_FILE=$2
+  shift 2
+fi
 
 if (( CHECK_AC_POWER )) && ! on_ac_power; then
-    log info "on battery, will retry later"
-    exit 1
+  log info "on battery, will retry later"
+  exit 1
 fi
 
 if [[ -n "${CHECK_NETWORK_MANAGER_NETWORK:-}" ]]; then
@@ -82,13 +92,16 @@ if [[ -n "${EXTRA_BORGMATIC_ARGS:-}" ]]; then
   BORGMATIC_ARGS=("${BORGMATIC_ARGS[@]}" "${EXTRA_BORGMATIC_ARGS[@]}")
 fi
 
+trap - ERR
 set +e
 # ionice class 3 is idle
 nice -n 19 ionice -c 3 borgmatic "${BORGMATIC_ARGS[@]}" "$@"
 rc=$?
 set -e
+trap stop_run_until_success ERR
+
 if [[ $rc -ne 0 ]]; then
-  log error "rsnapshot job ${job} failed with code $rc. Abort."
+  log error "borgmatic job failed with code $rc. Abort."
   exit 9
 fi
 
