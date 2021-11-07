@@ -2,7 +2,7 @@
 # Worker for test_run_until_success.sh. This worker run for four times
 # with rc=1, then exit with a 0 rc on the fifth run.
 #
-# Copyright (c) 2016-2020, Yan Li <yanli@tuneup.ai>,
+# Copyright (c) 2016-2021, Yan Li <yanli@tuneup.ai>,
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without

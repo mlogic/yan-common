@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Test cases for fileset_par2.py
 #
-# Copyright (c) 2016-2020, Yan Li <yanli@tuneup.ai>,
+# Copyright (c) 2016-2021, Yan Li <yanli@tuneup.ai>,
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without

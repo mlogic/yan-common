@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Copyright (c) 2016-2020, Yan Li <yanli@tuneup.ai>,
+# Copyright (c) 2016-2021, Yan Li <yanli@tuneup.ai>,
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without

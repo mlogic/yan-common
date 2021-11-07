@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # Maintain/verify par2 files for a set of files based on mtime
 #
-# Copyright (c) 2016-2020, Yan Li <yanli@tuneup.ai>,
+# Copyright (c) 2016-2021, Yan Li <yanli@tuneup.ai>,
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
