@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 # Test cases for fileset_par2.py
 #
+# Run with DEBUG=1 set when you need to debug.
+#
 # Copyright (c) 2016-2021, Yan Li <yanli@tuneup.ai>,
 # All rights reserved.
 #
@@ -60,6 +62,23 @@ TC_NAME="${0}:test_verifying_par2_files"
 run_fileset_par2 test_fileset_par2_data --par2_dir "${tmp_par2_dir}"
 echo "PASS: ${TC_NAME}"
 
+TC_NAME="${0}:check_handling_parent_dir_with_no_write_permission"
+tmp_par2_data_dir="$(mktemp -d)"
+# We have to create a secondary level directory inside the new temp directory,
+# because you cannot remove write permission from a first level directory in
+# /tmp.
+tmp_par2_data_dir="${tmp_par2_data_dir}/new"
+rsync -a test_fileset_par2_data/ "${tmp_par2_data_dir}/"
+chmod -w "${tmp_par2_data_dir}"
+run_fileset_par2 "${tmp_par2_data_dir}" --use_hidden_dir
+diff -Nur "${tmp_par2_data_dir}/.par2" "test_fileset_par2_expected"
+# Make sure that we keep the parent directory mode unchanged
+if ! stat "${tmp_par2_data_dir}" | grep -q "/dr-x"; then
+  echo "FAIL: ${TC_NAME}: ${tmp_par2_data_dir} should not have write permission"
+  exit 1
+fi
+echo "PASS: ${TC_NAME}"
+
 TC_NAME="${0}:test_generating_par2_files_in_hidden_par2_dir"
 tmp_par2_data_dir="$(mktemp -d)"
 rsync -a test_fileset_par2_data/ "${tmp_par2_data_dir}/"
@@ -68,6 +87,7 @@ diff -Nur "${tmp_par2_data_dir}/.par2" "test_fileset_par2_expected"
 echo "PASS: ${TC_NAME}"
 
 TC_NAME="${0}:test_verifying_par2_files"
+# This test reuses tmp_par2_data_dir from previous test!!!
 run_fileset_par2 "${tmp_par2_data_dir}" --use_hidden_dir
 diff -Nur "${tmp_par2_data_dir}/.par2" "test_fileset_par2_expected"
 echo "PASS: ${TC_NAME}"

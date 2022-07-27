@@ -83,38 +83,61 @@ def create_par2(file: str, par2_path: str, par2_recovery_file_arg: str):
            f'"{escape_for_bash(par2_path)}" "{escape_for_bash(file)}" && '
            f'mv "{escape_for_bash(par2_path_no_ext)}".vol*.par2 "{escape_for_bash(par2_path_no_ext)}.par2"')
     if not DRY_RUN:
-        if os.geteuid() == 0:
-            # Find the uid and gid of the first parent that exists
-            higher_parent_dir = par2_parent_dir
-            while True:
-                if os.path.exists(higher_parent_dir):
-                    stat = os.stat(higher_parent_dir)
-                    uid = stat.st_uid
-                    gid = stat.st_gid
-                    username = pwd.getpwuid(uid).pw_name
-                    groupname = grp.getgrgid(gid).gr_name
-                    break
-                higher_parent_dir = os.path.split(higher_parent_dir)[0]
+        # Find the uid and gid of the first parent that exists
+        higher_parent_dir = par2_parent_dir
+        while True:
+            if os.path.exists(higher_parent_dir):
+                stat = os.stat(higher_parent_dir)
+                uid = stat.st_uid
+                gid = stat.st_gid
+                username = pwd.getpwuid(uid).pw_name
+                groupname = grp.getgrgid(gid).gr_name
+                break
+            higher_parent_dir = os.path.split(higher_parent_dir)[0]
 
-        if not os.path.exists(par2_parent_dir):
-            if os.geteuid() == 0:
-                # We don't want to create files as root. Change the
-                # owner of the directory to the owner of parent
-                # directory. We use sudo + mkdir -p instead of
-                # os.makedirs() so that all missing directories could
-                # be created with the desired uid and gid
-                # automatically.
-                mkdir_cmd = f'sudo -u {username} -g {groupname} '
-                logger.debug(f'Creating par2 file parent directory(s) with user {username} and group {groupname}')
-            else:
-                mkdir_cmd = ''
-                logger.debug('Creating par2 file parent directory(s)')
-            mkdir_cmd += f'mkdir -p "{par2_parent_dir}"'
-            rc = os.system(mkdir_cmd)
+        # Check if we have write permission to the parent dir that exists
+        if not os.access(higher_parent_dir, os.W_OK):
+            logger.debug(f'Parent directory {higher_parent_dir} is not writable. Granting write permission temporarily...')
+            chmod_cmd = f'chmod u+w "{higher_parent_dir}"'
+            rc = os.system(chmod_cmd)
             if rc != 0:
-                error_msg = f'Failed command with rc {rc}: {mkdir_cmd}'
+                error_msg = f'Failed command with rc {rc}: {chmod_cmd}'
                 logger.error(error_msg)
                 raise IOError(error_msg)
+            need_remove_higher_parent_dir_write_permission = True
+        else:
+            need_remove_higher_parent_dir_write_permission = False
+
+        try:
+            if not os.path.exists(par2_parent_dir):
+                if os.geteuid() == 0:
+                    # We don't want to create files as root. Change the
+                    # owner of the directory to the owner of parent
+                    # directory. We use sudo + mkdir -p instead of
+                    # os.makedirs() so that all missing directories could
+                    # be created with the desired uid and gid
+                    # automatically.
+                    mkdir_cmd = f'sudo -u {username} -g {groupname} '
+                    logger.debug(f'Creating par2 file parent directory(s) with user {username} and group {groupname}')
+                else:
+                    mkdir_cmd = ''
+                    logger.debug('Creating par2 file parent directory(s)')
+
+                mkdir_cmd += f'mkdir -p "{par2_parent_dir}"'
+                rc = os.system(mkdir_cmd)
+                if rc != 0:
+                    error_msg = f'Failed command with rc {rc}: {mkdir_cmd}'
+                    logger.error(error_msg)
+                    raise IOError(error_msg)
+        finally:
+            if need_remove_higher_parent_dir_write_permission:
+                logger.debug(f'Removing temporary write permission from parent directory {higher_parent_dir}...')
+                chmod_cmd = f'chmod u-w "{higher_parent_dir}"'
+                rc = os.system(chmod_cmd)
+                if rc != 0:
+                    error_msg = f'Failed command with rc {rc}: {chmod_cmd}'
+                    logger.error(error_msg)
+                    raise IOError(error_msg)
 
         logger.debug(f'Creating par2 file: {cmd}')
         if os.geteuid() == 0:
