@@ -95,8 +95,19 @@ def create_par2(file: str, par2_path: str, par2_recovery_file_arg: str):
                 break
             higher_parent_dir = os.path.split(higher_parent_dir)[0]
 
-        # Check if we have write permission to the parent dir that exists
-        if not os.access(higher_parent_dir, os.W_OK):
+        # Check if we have write permission to the parent dir that exists.
+        # Normally you'd use os.access(higher_parent_dir, os.W_OK), but we
+        # can't do that here, because if we were root, os.access() would
+        # always return success, which might cause a failure when we run
+        # mkdir under {username} later. We use [ -w dir ]; to test if we
+        # have write access to it.
+        if os.geteuid() == 0:
+            check_writable_cmd = f'sudo -u {username} -g {groupname} '
+        else:
+            check_writable_cmd = ''
+        check_writable_cmd += f'[ -w "{higher_parent_dir}" ]'
+        rc = os.system(check_writable_cmd)
+        if rc != 0:
             logger.debug(f'Parent directory {higher_parent_dir} is not writable. Granting write permission temporarily...')
             chmod_cmd = f'chmod u+w "{higher_parent_dir}"'
             rc = os.system(chmod_cmd)
