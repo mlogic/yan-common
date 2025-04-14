@@ -33,8 +33,11 @@ HISTFILESIZE=2000
 # check the window size after each command and, if necessary,
 # update the values of LINES and COLUMNS.
 shopt -s checkwinsize
-# Correct spelling mistakes when using 'cd'
-shopt -s cdspell
+
+# DO NOT use spelling auto-correction when using 'cd'. It is dangerous
+# and would very easily lead you to work in a wrong directory.
+shopt -u cdspell
+
 # Do not attempt completion on an empty line
 shopt -s no_empty_cmd_completion
 
