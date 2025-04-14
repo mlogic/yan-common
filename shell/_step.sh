@@ -70,7 +70,7 @@ fi
 if [[ -z "${_yc_start_step:-}" ]]; then
   # start_step is not used. Start from the first step.
   _yc_start_step_seen=1
-  rm "${_YC_LAST_STEP_FILE}"
+  rm -f "${_YC_LAST_STEP_FILE}"
 else
   _yc_start_step_seen=0
 fi
@@ -96,6 +96,8 @@ run_step() {
     echo "$STEP_NAME" >"${_YC_LAST_STEP_FILE}"
     _yc_start_step_seen=1
     "$@"
+  else
+    echo "Step ${STEP_NAME} is skipped."
   fi
 }
 
