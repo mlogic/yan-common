@@ -183,14 +183,29 @@ def verify_par2(file: str, par2_path: str) -> bool:
 
 
 def update_par2(file: str, par2_file: str, no_update: bool, par2_recovery_file_arg: str) -> bool:
-    """Update par2
+    """Verify, update, or create a par2 file for one file
+
+    If the par2 file for the file exists, is not empty and is newer than the
+    file, verify the correctness of the file. If the par2 file is older than the
+    file, remove the par2 file and create a new one. If the par2 file does not
+    exist, create a new one.
 
     Args:
+        file: The path of the source data file.
+        par2_file: The path of the destination par2 file.
+        no_update: If true, verify only and do not update the par2 file. Returns
+            false if the par2 file does not exist or is empty.
         par2_recovery_file_arg: The args that will be passed to par2create.
 
     :returns false if a corrupted file is detected
     """
-    file_mtime = os.path.getmtime(file)
+    try:
+      file_mtime = os.path.getmtime(file)
+    except FileNotFoundError:
+        # It is possible a file got deleted while we are processing the input
+        # list. We should just skip it.
+        logger.warning(f'File {file} does not exist, skipping')
+        return True
     if os.path.exists(par2_file) and os.path.getsize(par2_file) > 0:
         logger.info(f'par2 file {par2_file} exists')
         par2_mtime = os.path.getmtime(par2_file)
