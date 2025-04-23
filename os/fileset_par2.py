@@ -35,6 +35,7 @@ import logging
 import os
 import pwd
 import sys
+import concurrent.futures
 
 DRY_RUN = False
 BASE_DIR = ''
@@ -67,13 +68,16 @@ def create_par2(file: str, par2_path: str, par2_recovery_file_arg: str):
     par2_parent_dir = os.path.split(os.path.realpath(par2_path))[0]
     file_parent_dir, file_name = os.path.split(os.path.realpath(file))
     if len(file_name) == 1:
-        logger.info(f'Ignoring file {file} because par2 cannot process file that has name of length 1')
+        logger.info(
+            f'Ignoring file {file} because par2 cannot process file that has name of length 1')
         return
     if '*' in file_name or '?' in file_name:
-        logger.info(f'Ignoring file {file} because par2 cannot process file that has wildcards in name')
+        logger.info(
+            f'Ignoring file {file} because par2 cannot process file that has wildcards in name')
         return
     if os.path.getsize(file) == 0:
-        logger.info(f'Ignoring file {file} because par2 cannot process file that has size 0')
+        logger.info(
+            f'Ignoring file {file} because par2 cannot process file that has size 0')
         return
 
     # TODO: check file size and adjust the parity percent to make sure
@@ -108,7 +112,8 @@ def create_par2(file: str, par2_path: str, par2_recovery_file_arg: str):
         check_writable_cmd += f'[ -w "{higher_parent_dir}" ]'
         rc = os.system(check_writable_cmd)
         if rc != 0:
-            logger.debug(f'Parent directory {higher_parent_dir} is not writable. Granting write permission temporarily...')
+            logger.debug(
+                f'Parent directory {higher_parent_dir} is not writable. Granting write permission temporarily...')
             chmod_cmd = f'chmod u+w "{higher_parent_dir}"'
             rc = os.system(chmod_cmd)
             if rc != 0:
@@ -129,7 +134,8 @@ def create_par2(file: str, par2_path: str, par2_recovery_file_arg: str):
                     # be created with the desired uid and gid
                     # automatically.
                     mkdir_cmd = f'sudo -u {username} -g {groupname} '
-                    logger.debug(f'Creating par2 file parent directory(s) with user {username} and group {groupname}')
+                    logger.debug(
+                        f'Creating par2 file parent directory(s) with user {username} and group {groupname}')
                 else:
                     mkdir_cmd = ''
                     logger.debug('Creating par2 file parent directory(s)')
@@ -142,7 +148,8 @@ def create_par2(file: str, par2_path: str, par2_recovery_file_arg: str):
                     raise IOError(error_msg)
         finally:
             if need_remove_higher_parent_dir_write_permission:
-                logger.debug(f'Removing temporary write permission from parent directory {higher_parent_dir}...')
+                logger.debug(
+                    f'Removing temporary write permission from parent directory {higher_parent_dir}...')
                 chmod_cmd = f'chmod u-w "{higher_parent_dir}"'
                 rc = os.system(chmod_cmd)
                 if rc != 0:
@@ -154,7 +161,8 @@ def create_par2(file: str, par2_path: str, par2_recovery_file_arg: str):
         if os.geteuid() == 0:
             cmd += f' && chown {username}:{groupname} "{escape_for_bash(par2_path_no_ext)}.par2"'
         if os.system(cmd) != 0:
-            logger.error(f'Failed to create par2 file for {file} in {par2_path}')
+            logger.error(
+                f'Failed to create par2 file for {file} in {par2_path}')
     else:
         if not os.path.exists(par2_parent_dir):
             print(f'Will create dir {par2_parent_dir}')
@@ -165,13 +173,13 @@ def verify_par2(file: str, par2_path: str) -> bool:
     par2_parent_dir = os.path.split(os.path.realpath(par2_path))[0]
     file_parent_dir = os.path.split(os.path.realpath(file))[0]
     cmd = f'cd "{escape_for_bash(par2_parent_dir)}" && '\
-          f'chronic nice -n 19 par2verify "-B{escape_for_bash(file_parent_dir)}" "{escape_for_bash(par2_path)}" '\
-          f'"{escape_for_bash(file)}"'
+        f'chronic nice -n 19 par2verify "-B{escape_for_bash(file_parent_dir)}" "{escape_for_bash(par2_path)}" '\
+        f'"{escape_for_bash(file)}"'
     if DRY_RUN:
         print(f'dry run: {cmd}')
         return True
     else:
-        logger.info(f'Verifying {file} using par2 file {par2_file}')
+        logger.info(f'Verifying {file} using par2 file {par2_path}')
         logger.debug(f'Running {cmd}')
         rc = os.system(cmd)
         if rc == 0:
@@ -200,7 +208,7 @@ def update_par2(file: str, par2_file: str, no_update: bool, par2_recovery_file_a
     :returns false if a corrupted file is detected
     """
     try:
-      file_mtime = os.path.getmtime(file)
+        file_mtime = os.path.getmtime(file)
     except FileNotFoundError:
         # It is possible a file got deleted while we are processing the input
         # list. We should just skip it.
@@ -225,13 +233,16 @@ def update_par2(file: str, par2_file: str, no_update: bool, par2_recovery_file_a
     else:
         if not os.path.exists(par2_file):
             if no_update:
-                logger.error(f'NO-UPDATE MODE: {file} does not have par2 file at {par2_file}')
+                logger.error(
+                    f'NO-UPDATE MODE: {file} does not have par2 file at {par2_file}')
                 return False
             else:
-                logger.debug(f'par2 file {par2_file} does not exists, will create it')
+                logger.debug(
+                    f'par2 file {par2_file} does not exists, will create it')
         else:
             if no_update:
-                logger.error(f'NO-UPDATE MODE: {file} has a 0-size par2 file at {par2_file}')
+                logger.error(
+                    f'NO-UPDATE MODE: {file} has a 0-size par2 file at {par2_file}')
                 return False
             logger.info(f'par2 file {par2_file} has size 0, recreating it')
     create_par2(file, par2_file, par2_recovery_file_arg)
@@ -239,8 +250,7 @@ def update_par2(file: str, par2_file: str, no_update: bool, par2_recovery_file_a
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description=
-"""Maintain/verify par2 files for a set of files based on mtime. Input is read from
+    parser = argparse.ArgumentParser(description="""Maintain/verify par2 files for a set of files based on mtime. Input is read from
 stdin and should have a file name on each time.
 
 Examples: list all files and filter out certain directories:
@@ -265,6 +275,8 @@ they could be moved around together.""", formatter_class=argparse.RawTextHelpFor
                         help='check only, do not update par2 files')
     parser.add_argument('--par2_dir', metavar='DIR', type=str,
                         help='the directory for storing par2 files')
+    parser.add_argument('--workers', type=int, default=4,
+                        help='number of worker threads to use for parallel processing (default: 4)')
     args = parser.parse_args()
 
     logger = logging.getLogger(__name__)
@@ -302,51 +314,80 @@ they could be moved around together.""", formatter_class=argparse.RawTextHelpFor
     logger.debug(f'Base dir {BASE_DIR}')
 
     corrupted_files = 0
-    for file in map(str.rstrip, sys.stdin):
-        if os.path.isabs(file) and args.par2_dir is not None:
-            logger.error('Input file path must be relative path when par2_dir is set. Exiting')
-            exit(1)
-        if os.path.isdir(file):
-            logger.debug(f'Ignoring directory {file}')
-            continue
-        data_file = os.path.realpath(os.path.join(BASE_DIR, file))
-        if args.par2_dir is not None:
-            par2_file = os.path.realpath(os.path.join(os.path.realpath(args.par2_dir), file + '.par2'))
-        else:
-            assert args.use_hidden_dir, "You must either set par2_dir or use_hidden_dir."
-            # using hidden dir
-            data_file_path, data_file_name = os.path.split(data_file)
-            if data_file_name[-5:] == '.par2' and data_file_path[-6:] == '/.par2':
-                # This file is actually a par2 file. We check if the corresponding data
-                # file exists. If not, prune this par2 file.
-                par2_file = data_file
-                # Remove the .par2 from path
-                data_file_path = os.path.split(data_file_path)[0]
-                data_file_name = data_file_name[:-5]
-                data_file = os.path.join(data_file_path, data_file_name)
-                logger.debug(f'Checking if the data file {data_file} for par2 file {par2_file} exists')
-                if os.path.isfile(data_file):
-                    logger.debug(f'File {data_file} exists')
-                else:
-                    if args.no_update:
-                        logger.error(f'NO-UPDATE MODE: data file missing {data_file}')
-                        corrupted_files += 1
+
+    def process_file(file):
+        """
+        Process a single file for par2 verification or creation.
+
+        Returns:
+            0 if the file was processed successfully or skipped.
+            1 if the file is corrupted or an error occurred.
+        """
+        try:
+            if os.path.isabs(file) and args.par2_dir is not None:
+                logger.error(
+                    'Input file path must be relative path when par2_dir is set. Exiting')
+                return 1
+            if os.path.isdir(file):
+                logger.debug(f'Ignoring directory {file}')
+                return 0
+            data_file = os.path.realpath(os.path.join(BASE_DIR, file))
+            if args.par2_dir is not None:
+                par2_file = os.path.realpath(os.path.join(
+                    os.path.realpath(args.par2_dir), file + '.par2'))
+            else:
+                assert args.use_hidden_dir, "You must either set par2_dir or use_hidden_dir."
+                # using hidden dir
+                data_file_path, data_file_name = os.path.split(data_file)
+                if data_file_name[-5:] == '.par2' and data_file_path[-6:] == '/.par2':
+                    # This file is actually a par2 file. We check if the corresponding data
+                    # file exists. If not, prune this par2 file.
+                    par2_file = data_file
+                    # Remove the .par2 from path
+                    data_file_path = os.path.split(data_file_path)[0]
+                    data_file_name = data_file_name[:-5]
+                    data_file = os.path.join(data_file_path, data_file_name)
+                    logger.debug(
+                        f'Checking if the data file {data_file} for par2 file {par2_file} exists')
+                    if os.path.isfile(data_file):
+                        logger.debug(f'File {data_file} exists')
                     else:
-                        if DRY_RUN:
-                            print(f'dry run: cannot find the data file {data_file} for par2 file {par2_file}, '
-                                  'will remove the dangling par2 file')
+                        if args.no_update:
+                            logger.error(
+                                f'NO-UPDATE MODE: data file missing {data_file}')
+                            return 1
                         else:
-                            logger.info(f'Cannot find the data file {data_file} for par2 file {par2_file}, '
-                                        'removing the dangling par2 file')
-                            os.remove(par2_file)
-                            par2_file_dir = os.path.split(par2_file)[0]
-                            files = os.listdir(par2_file_dir)
-                            if len(files) == 0:
-                                logger.info(f'Removing the empty dir {par2_file_dir}')
-                                os.rmdir(par2_file_dir)
-                continue
-            par2_file = os.path.join(os.path.join(data_file_path, '.par2'), data_file_name) + '.par2'
-        logger.info(f'Checking {data_file} with par2 file {par2_file}')
-        if not update_par2(data_file, par2_file, args.no_update, par2_recovery_file_arg):
-            corrupted_files += 1
+                            if DRY_RUN:
+                                print(f'dry run: cannot find the data file {data_file} for par2 file {par2_file}, '
+                                      'will remove the dangling par2 file')
+                            else:
+                                logger.info(f'Cannot find the data file {data_file} for par2 file {par2_file}, '
+                                            'removing the dangling par2 file')
+                                os.remove(par2_file)
+                                par2_file_dir = os.path.split(par2_file)[0]
+                                files = os.listdir(par2_file_dir)
+                                if len(files) == 0:
+                                    logger.info(
+                                        f'Removing the empty dir {par2_file_dir}')
+                                    try:
+                                        os.rmdir(par2_file_dir)
+                                    except FileNotFoundError:
+                                        # This directory might have already been
+                                        # removed by another thread.
+                                        pass
+                    return 0
+                par2_file = os.path.join(os.path.join(
+                    data_file_path, '.par2'), data_file_name) + '.par2'
+            logger.info(f'Checking {data_file} with par2 file {par2_file}')
+            if not update_par2(data_file, par2_file, args.no_update, par2_recovery_file_arg):
+                return 1
+            return 0
+        except Exception as e:
+            logger.error(f"Error processing file {file}: {e}")
+            return 1
+
+    with concurrent.futures.ThreadPoolExecutor(max_workers=args.workers) as executor:
+        results = list(executor.map(process_file, map(str.rstrip, sys.stdin)))
+
+    corrupted_files = sum(results)
     sys.exit(corrupted_files)
