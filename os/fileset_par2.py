@@ -235,7 +235,11 @@ def update_par2(file: str, par2_file: str, no_update: bool, par2_recovery_file_a
         logger.info(f'par2 file {par2_file} exists')
         par2_mtime = os.path.getmtime(par2_file)
         if file_mtime <= par2_mtime:
-            return verify_par2(file, par2_file)
+            verify_result = verify_par2(file, par2_file)
+            if not verify_result:
+                logger.error(f'File {file} has mtime {file_mtime}, par2 file {par2_file} '
+                             f'has mtime {par2_mtime}.')
+            return verify_result
         else:
             if no_update:
                 logger.error(f'NO-UPDATE MODE, SKIPPED CHANGED FILE {file}')
