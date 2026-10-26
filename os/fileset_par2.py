@@ -31,6 +31,7 @@
 
 import argparse
 import grp
+import math
 import logging
 import os
 import pwd
@@ -40,6 +41,15 @@ import concurrent.futures
 DRY_RUN = False
 BASE_DIR = ''
 logger = None
+
+# par2create splits a file into 2000 blocks by default, so with -r1 any file
+# smaller than 2000 * 4096 bytes gets recovery blocks smaller than a disk
+# sector and can't repair even one bad sector. For such files we use
+# sector-sized blocks and 1% (at least one) recovery blocks instead, which
+# also makes their par2 files much smaller.
+DEFAULT_RECOVERY_ARG = '-r1'
+PAR2_DEFAULT_BLOCK_COUNT = 2000
+SECTOR_SIZE = 4096
 
 
 def escape_for_bash(name: str) -> str:
@@ -75,15 +85,22 @@ def create_par2(file: str, par2_path: str, par2_recovery_file_arg: str):
         logger.info(
             f'Ignoring file {file} because par2 cannot process file that has wildcards in name')
         return
-    if os.path.getsize(file) == 0:
+    file_size = os.path.getsize(file)
+    if file_size == 0:
         logger.info(
             f'Ignoring file {file} because par2 cannot process file that has size 0')
         return
 
-    # TODO: check file size and adjust the parity percent to make sure
-    # the file would survive a one-sector (4096 bytes) damage.
+    if (par2_recovery_file_arg == DEFAULT_RECOVERY_ARG
+            and file_size < PAR2_DEFAULT_BLOCK_COUNT * SECTOR_SIZE):
+        recovery_block_count = max(1, math.ceil(file_size / SECTOR_SIZE / 100))
+        par2_recovery_file_arg = f'-s{SECTOR_SIZE} -c{recovery_block_count}'
+
+    # -t1: we already run --workers par2 processes in parallel. Letting each
+    # one start a thread per CPU oversubscribes the CPUs and par2create on a
+    # small file goes from 0.03s to 20+s.
     cmd = (f'set -eu; cd "{escape_for_bash(par2_parent_dir)}" && '
-           f'chronic nice -n 19 par2create "-B{escape_for_bash(file_parent_dir)}" {par2_recovery_file_arg} -n1 '
+           f'chronic nice -n 19 par2create -t1 "-B{escape_for_bash(file_parent_dir)}" {par2_recovery_file_arg} -n1 '
            f'"{escape_for_bash(par2_path)}" "{escape_for_bash(file)}" && '
            f'mv "{escape_for_bash(par2_path_no_ext)}".vol*.par2 "{escape_for_bash(par2_path_no_ext)}.par2"')
     if not DRY_RUN:
@@ -173,7 +190,7 @@ def verify_par2(file: str, par2_path: str) -> bool:
     par2_parent_dir = os.path.split(os.path.realpath(par2_path))[0]
     file_parent_dir = os.path.split(os.path.realpath(file))[0]
     cmd = f'cd "{escape_for_bash(par2_parent_dir)}" && '\
-        f'chronic nice -n 19 par2verify "-B{escape_for_bash(file_parent_dir)}" "{escape_for_bash(par2_path)}" '\
+        f'chronic nice -n 19 par2verify -t1 "-B{escape_for_bash(file_parent_dir)}" "{escape_for_bash(par2_path)}" '\
         f'"{escape_for_bash(file)}"'
     if DRY_RUN:
         print(f'dry run: {cmd}')
@@ -263,7 +280,8 @@ they could be moved around together.""", formatter_class=argparse.RawTextHelpFor
                         help='also log every event to systemd')
     parser.add_argument('-c', metavar='RECOVERY_BLOCK_COUNT', type=int,
                         help='the recovery block count; if not set, -r1 will be passed to par2create, which creates a '
-                             'recovery file the size of which equals 1%% of the size of original file; it is '
+                             'recovery file the size of which equals 1%% of the size of original file (files '
+                             'smaller than 8 MB use 4096-byte blocks and 1%% but at least one recovery block); it is '
                              'recommended to use -c and -s together to find tune the amount of recovery blocks and '
                              'size you want to create')
     parser.add_argument('-s', metavar='BLOCK_SIZE', type=int,
@@ -303,7 +321,7 @@ they could be moved around together.""", formatter_class=argparse.RawTextHelpFor
     if args.c:
         par2_recovery_file_arg = f'-c{args.c}'
     else:
-        par2_recovery_file_arg = '-r1'
+        par2_recovery_file_arg = DEFAULT_RECOVERY_ARG
     if args.s:
         par2_recovery_file_arg += f' -s{args.s}'
 
